@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bank Day - Finanças Inteligentes</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.jpeg"> <meta name="theme-color" content="#075e54">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Bank Day">
+    <link rel="icon" href="data:,">
+
+    <style>
+        /* Seus estilos começam aqui... */
+
+        :root {
+            --bg: #e5ddd5;
+            --card: #ffffff;
+            --text: #1e1e1e;
+            --border: #ddd;
+            --primary: #25d366;
+            --msg-user: #d9fdd3;
+            --msg-system: #ffffff;
+            --header: #075e54;
+            --header-text: #ffffff;
+            --danger: #ef4444;
+            --sidebar: #111b21;
+            --sidebar-text: #e9edef;
+        }
+        body.dark {
+            --bg: #0b141a;
+            --card: #1f2c33;
+            --text: #e9edef;
+            --border: #2a3942;
+            --primary: #00a884;
+            --msg-user: #005c4b;
+            --msg-system: #1f2c33;
+            --header: #1f2c33;
+            --header-text: #e9edef;
+            --sidebar: #1f2c33;
+            --sidebar-text: #e9edef;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        html, body { height: 100%; }
+        body { background: #0a1014; color: var(--text); overflow: hidden; }
+
+        .app-wrapper {
+            max-width: 1600px;
+            margin: 0 auto;
+            height: 100vh;
+            display: flex;
+            background: var(--bg);
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+
+        .sidebar {
+            width: 30%;
+            min-width: 320px;
+            max-width: 420px;
+            background: var(--sidebar);
+            color: var(--sidebar-text);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+        }
+        .sidebar-header {
+            background: var(--header);
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .sidebar-header h1 { font-size: 18px; }
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+        .sidebar-item {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 4px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .sidebar-item:hover { background: rgba(255,255,255,0.05); }
+        .sidebar-item.active { background: rgba(37,211,102,0.2); }
+        .sidebar-item-info strong { display: block; font-size: 14px; }
+        .sidebar-item-info span { font-size: 12px; opacity: 0.7; }
+        .sidebar-item-valor { font-size: 13px; font-weight: 600; }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+            min-width: 0;
+        }
+
+        .chat-area::-webkit-scrollbar { width: 6px; }
+        .chat-area::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.2);
+            border-radius: 3px;
+        }
+        body.dark .chat-area::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+        }
+
+        @media (hover: hover) {
+            .icon-btn:hover { opacity: 0.7; }
+            .mes-nav button:hover { background: rgba(255,255,255,0.2); border-radius: 4px; }
+            #btnEnviar:hover { opacity: 0.9; transform: scale(1.05); }
+        }
+
+        .app-header {
+            background: var(--header); color: var(--header-text); padding: 12px 16px 8px 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2); flex-shrink: 0;
+        }
+        .header-top {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 12px; position: relative;
+        }
+        .header-top h1 { font-size: 18px; }
+        .header-actions { display: flex; gap: 10px; align-items: center; }
+        .icon-btn { cursor: pointer; font-size: 20px; background: none; border: none; color: var(--header-text); }
+
+        .mes-nav {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 10px; background: rgba(255,255,255,0.15);
+            padding: 6px 10px; border-radius: 8px;
+        }
+        .mes-nav button { background: none; border: none; font-size: 18px; color: var(--header-text); cursor: pointer; }
+        .mes-nav h2 { text-transform: capitalize; font-size: 15px; color: var(--header-text); }
+
+        .config-saldo {
+            background: rgba(255,255,255,0.15); padding: 6px 10px; border-radius: 8px;
+            margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px;
+        }
+        .config-saldo label { color: var(--header-text); display: flex; align-items: center; gap: 6px; }
+        .config-saldo input { width: 14px; height: 14px; }
+
+        .totais {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+        }
+        .totais div {
+            text-align: center; font-size: 10px; background: rgba(255,255,255,0.15);
+            padding: 6px 4px; border-radius: 6px; color: var(--header-text);
+        }
+        .totais strong { display: block; font-size: 13px; margin-top: 2px; }
+        .positivo { color: #4ade80!important; }
+        .negativo { color: #f87171!important; }
+
+        .chat-area {
+            flex: 1; overflow-y: auto; padding: 12px;
+            background-color: var(--bg); min-height: 0;
+            background-image: none;
+        }
+        .msg { display: flex; margin-bottom: 8px; animation: slideIn 0.2s ease; transition: opacity 0.3s; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } }
+        .msg.user { justify-content: flex-end; }
+        .msg-bubble {
+            max-width: 65%; padding: 8px 12px; border-radius: 8px;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.1); font-size: 14px; word-wrap: break-word;
+        }
+        .msg.user .msg-bubble {
+            background: var(--msg-user); border-bottom-right-radius: 2px; cursor: pointer;
+        }
+        .msg.system .msg-bubble {
+            background: var(--msg-system); border-bottom-left-radius: 2px;
+        }
+        .msg-time { font-size: 10px; opacity: 0.6; margin-top: 2px; text-align: right; }
+        .msg-info { font-size: 11px; opacity: 0.7; margin-top: 4px; }
+
+        .input-area {
+            background: var(--card); padding: 8px 12px; display: flex; gap: 8px;
+            align-items: center; border-top: 1px solid var(--border); flex-shrink: 0;
+        }
+        #inputValor {
+            flex: 1; padding: 10px 14px; border: 1px solid var(--border);
+            border-radius: 20px; background: var(--bg); color: var(--text); font-size: 14px;
+        }
+        #inputValor:disabled { opacity: 0.5; }
+        #btnEnviar {
+            background: var(--primary); color: white; border: none;
+            width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 18px;
+        }
+        #btnEnviar:disabled { opacity: 0.5; }
+
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center;
+            z-index: 999; padding: 16px; overflow-y: auto;
+        }
+        .modal-content {
+            background: var(--card); padding: 20px; border-radius: 12px;
+            width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 8px;
+            max-height: 90vh; overflow-y: auto;
+        }
+        .modal-content h3 { margin-bottom: 8px; }
+        .modal-content p { font-size: 13px; opacity: 0.7; margin-bottom: 8px; }
+        .modal-content label { font-size: 12px; margin-top: 4px; opacity: 0.8; }
+        .modal-content input,.modal-content select {
+            padding: 10px; border-radius: 6px; border: 1px solid var(--border);
+            background: var(--bg); color: var(--text);
+        }
+        .modal-content input:disabled { opacity: 0.6; }
+        .modal-botoes { display: flex; gap: 10px; margin-top: 12px; }
+        .modal-botoes button {
+            flex: 1; padding: 10px; border: none; border-radius: 6px; cursor: pointer;
+        }
+        .modal-botoes button:last-child { background: var(--primary); color: white; }
+        .modal-botoes button.danger { background: var(--danger); color: white; }
+        .step { font-size: 11px; opacity: 0.6; text-align: center; margin-bottom: 8px; }
+
+        .menu-dropdown {
+            position: absolute; top: 40px; right: 0; background: var(--card);
+            border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: none; flex-direction: column; z-index: 1000; min-width: 200px;
+        }
+        .menu-dropdown button {
+            background: none; border: none; padding: 12px 16px; text-align: left;
+            color: var(--text); cursor: pointer; font-size: 14px;
+        }
+        .menu-dropdown button:hover { background: var(--bg); }
+
+        .tabs { display: flex; gap: 8px; margin-bottom: 12px; border-bottom: 1px solid var(--border); }
+        .tabs button {
+            flex: 1; padding: 10px; background: none; border: none;
+            color: var(--text); cursor: pointer; border-bottom: 2px solid transparent;
+        }
+        .tabs button.active { border-bottom-color: var(--primary); font-weight: 600; }
+
+        .lista-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px; background: var(--bg); border-radius: 6px; margin-bottom: 8px;
+        }
+        .lista-item-info { flex: 1; }
+        .lista-item-info strong { display: block; font-size: 14px; }
+        .lista-item-info span { font-size: 12px; opacity: 0.7; }
+        .lista-item-acoes { display: flex; gap: 6px; }
+        .lista-item-acoes button {
+            background: none; border: none; font-size: 18px; cursor: pointer; padding: 4px;
+        }
+        .lista-item-acoes button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .tabela-transacoes { width: 100%; font-size: 12px; }
+        .tabela-transacoes th { text-align: left; padding: 8px 4px; opacity: 0.7; }
+        .tabela-transacoes td { padding: 8px 4px; border-top: 1px solid var(--border); }
+        .valor-pos { color: #4ade80; }
+        .valor-neg { color: #f87171; }
+
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .app-wrapper { max-width: 480px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-wrapper">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h1>Bank Day</h1>
+                <button class="icon-btn" onclick="abrirModalGerenciar()">+</button>
+            </div>
+            <div class="sidebar-content" id="sidebar-content"></div>
+        </div>
+
+        <div class="container">
+            <div class="app-header">
+                <div class="header-top">
+                    <h1 id="conta-selecionada">Bank Day</h1>
+                    <div class="header-actions">
+                        <button class="icon-btn" onclick="alternarTema()" id="btnTema">🌙</button>
+                        <button class="icon-btn" onclick="alternarValores()" id="olho">👁️</button>
+                        <button class="icon-btn" onclick="toggleMenu()">⋮</button>
+                        <div class="menu-dropdown" id="menuDropdown">
+                            <button onclick="abrirModalGerenciar()">Contas e Cartões</button>
+                            <button onclick="abrirModalTransacoes('conta')">Transações por conta</button>
+                            <button onclick="abrirModalTransacoes('cartao')">Transações por cartão</button>
+                            <button onclick="abrirReset()">Resetar tudo</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mes-nav">
+                    <button onclick="mudarMes(-1)">&lt;</button>
+                    <h2 id="mesAtual"></h2>
+                    <button onclick="mudarMes(1)">&gt;</button>
+                </div>
+
+                <div class="config-saldo">
+                    <label><input type="checkbox" id="projetarSaldo" onchange="atualizar()"> Projetar Saldo anterior</label>
+                </div>
+
+                <div class="totais">
+                    <div>Entradas <strong id="totalEntradas" class="positivo">R$ 0,00</strong></div>
+                    <div>Saídas <strong id="totalSaidas" class="negativo">R$ 0,00</strong></div>
+                    <div>Fatura <strong id="totalFatura" class="negativo">R$ 0,00</strong></div>
+                    <div>Saldo <strong id="saldoMes">R$ 0,00</strong></div>
+                </div>
+            </div>
+
+            <div class="chat-area" id="chat-area"></div>
+
+            <div class="input-area">
+                <input type="text" id="inputValor" placeholder="Recebi 1000 nubank | Gastei 50 | Comprei no cartão nubank 200" disabled onkeydown="if(event.key==='Enter') enviarMsg()">
+                <button id="btnEnviar" onclick="enviarMsg()" disabled>➤</button>
+            </div>
+        </div>
+    </div>
+<script>
+    if ('serviceWorker' in navigator) {
+        // navigator.serviceWorker.register('./sw.js');
+    }
+
+    let dados = JSON.parse(localStorage.getItem("bankday_dados")) || [];
+    let contas = JSON.parse(localStorage.getItem("bankday_contas")) || [];
+    let cartoes = JSON.parse(localStorage.getItem("bankday_cartoes")) || [];
+    let config = JSON.parse(localStorage.getItem("bankday_config")) || { projetarSaldo: false };
+    let mesAtual = new Date();
+    let mostrar = true;
+    let onboardingCompleto = localStorage.getItem("bankday_onboarding") === "true";
+    let editandoContaId = null;
+    let editandoCartaoId = null;
+    let editandoTransacaoId = null;
+    let tipoTransacaoModal = 'conta';
+    let transacaoPendente = null;
+    let contaSelecionadaSidebar = null;
+
+    function cap(s) {
+        if (!s) return s;
+        return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+    }
+
+    function alternarTema() {
+        document.body.classList.toggle("dark");
+        const isDark = document.body.classList.contains("dark");
+        document.getElementById("btnTema").textContent = isDark? "☀️" : "🌙";
+        localStorage.setItem("bankday_tema", isDark? "dark" : "light");
+    }
+
+    function alternarValores() {
+        mostrar =!mostrar;
+        document.getElementById("olho").textContent = mostrar? "👁️" : "🙈";
+        atualizar();
+    }
+
+    function salvar() {
+        localStorage.setItem("bankday_dados", JSON.stringify(dados));
+        localStorage.setItem("bankday_contas", JSON.stringify(contas));
+        localStorage.setItem("bankday_cartoes", JSON.stringify(cartoes));
+        localStorage.setItem("bankday_config", JSON.stringify(config));
+    }
+
+    function extensoParaNumero(texto) {
+        const numeros = {
+            'zero': 0, 'um': 1, 'dois': 2, 'tres': 3, 'três': 3, 'quatro': 4, 'cinco': 5,
+            'seis': 6, 'sete': 7, 'oito': 8, 'nove': 9, 'dez': 10, 'cem': 100, 'mil': 1000
+        };
+        let total = 0;
+        let txt = texto.toLowerCase().replace(/reais?/g, '').trim();
+
+        const milMatch = txt.match(/(\w+)\s*mil/);
+        if (milMatch && numeros[milMatch[1]]) {
+            total += numeros[milMatch[1]] * 1000;
+            txt = txt.replace(milMatch[0], '');
+        } else if (txt.includes('mil')) {
+            total += 1000;
+            txt = txt.replace('mil', '');
+        }
+
+        if (txt.includes('trezentos')) total += 300;
+        if (txt.includes('duzentos')) total += 200;
+        if (txt.includes('quinhentos')) total += 500;
+        if (txt.includes('quatrocentos')) total += 400;
+        if (txt.includes('seiscentos')) total += 600;
+        if (txt.includes('setecentos')) total += 700;
+        if (txt.includes('oitocentos')) total += 800;
+        if (txt.includes('novecentos')) total += 900;
+
+        for (let n in numeros) {
+            if (txt.includes(n)) total += numeros[n];
+        }
+        return total || null;
+    }
+
+    function addMensagem(texto, tipo = 'system', info = '', autoLimpar = true, transacaoId = null) {
+        const chatArea = document.getElementById("chat-area");
+        const hora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        const div = document.createElement("div");
+        div.className = `msg ${tipo}`;
+        if (transacaoId) div.dataset.transacaoId = transacaoId;
+        div.innerHTML = `
+            <div class="msg-bubble" ${transacaoId? `onclick="abrirEditarTransacao(${transacaoId})"` : ''}>
+                ${texto}
+                ${info? `<div class="msg-info">${info}</div>` : ''}
+                <div class="msg-time">${hora}</div>
+            </div>
+        `;
+        chatArea.appendChild(div);
+        chatArea.scrollTop = chatArea.scrollHeight;
+
+        if (autoLimpar && tipo === 'system') {
+            setTimeout(() => {
+                div.style.opacity = '0';
+                setTimeout(() => div.remove(), 100);
+            }, 20000);
+        }
+    }
+
+    function checarOnboarding() {
+        if (!onboardingCompleto) {
+            document.getElementById("modal-conta").style.display = "flex";
+            document.getElementById("inputValor").disabled = true;
+            document.getElementById("btnEnviar").disabled = true;
+        } else {
+            document.getElementById("inputValor").disabled = false;
+            document.getElementById("btnEnviar").disabled = false;
+            document.getElementById("inputValor").placeholder = "Recebi 1000 nubank | Gastei 50 | Comprei no cartão nubank 200";
+            document.getElementById("projetarSaldo").checked = config.projetarSaldo;
+            if (document.getElementById("chat-area").children.length === 0) {
+                addMensagem("Use: Recebi | Gastei | Comprei no cartão", 'system', '', false);
+            }
+        }
+    }
+
+    function salvarConta(isEdicao = false) {
+        let nome = document.getElementById("conta-nome").value.trim();
+        const saldo = parseFloat(document.getElementById("conta-saldo").value) || 0;
+        if (!nome) { alert("Digite o nome da conta"); return; }
+
+        nome = cap(nome);
+
+        if (!isEdicao && contas.find(c => c.nome.toLowerCase() === nome.toLowerCase())) {
+            alert("Essa conta já existe");
+            return;
+        }
+
+        if (!isEdicao) {
+            contas.push({ id: Date.now(), nome: nome, saldoInicial: saldo, apelido: nome });
+            dados.push({
+                id: Date.now() + 1,
+                descricao: "Saldo inicial",
+                valor: saldo,
+                tipo: "entrada",
+                metodo: "saldo",
+                banco: nome,
+                data: new Date(mesAtual.getFullYear(), mesAtual.getMonth(), 1).toISOString(),
+                texto: `Saldo inicial ${nome} ${saldo}`,
+                isSaldoInicial: true
+            });
+            addMensagem(`Conta ${nome} cadastrada com R$ ${saldo.toFixed(2)}`, 'system', '', false);
+        }
+
+        salvar();
+        document.getElementById("conta-nome").value = "";
+        document.getElementById("conta-saldo").value = "";
+        if (!isEdicao) {
+            checarOnboarding();
+            atualizar();
+        }
+    }
+
+    function irParaCartoes() {
+        document.getElementById("modal-conta").style.display = "none";
+        document.getElementById("modal-cartao").style.display = "flex";
+        const selectBanco = document.getElementById("cartao-banco");
+        selectBanco.innerHTML = contas.map(c => `<option value="${c.nome}">${c.nome}</option>`).join('');
+        if (contas.length === 0) {
+            selectBanco.innerHTML = '<option value="">Cadastre uma conta primeiro</option>';
+        }
+    }
+
+    function salvarCartao() {
+        let nome = document.getElementById("cartao-nome").value.trim();
+        const fechamento = parseInt(document.getElementById("cartao-fechamento").value);
+        const vencimento = parseInt(document.getElementById("cartao-vencimento").value);
+        const banco = document.getElementById("cartao-banco").value;
+
+        if (!nome ||!fechamento ||!vencimento ||!banco) {
+            alert("Preencha todos os campos");
+            return;
+        }
+
+        nome = cap(nome);
+
+        if (cartoes.find(c => c.nome.toLowerCase() === nome.toLowerCase())) {
+            alert("Esse cartão já existe");
+            return;
+        }
+
+        cartoes.push({
+            id: Date.now(),
+            nome: nome,
+            apelido: nome,
+            fechamento: fechamento,
+            vencimento: vencimento,
+            bancoVinculado: banco
+        });
+
+        salvar();
+        addMensagem(`Cartão ${nome} cadastrado. Fecha dia ${fechamento}, vence dia ${vencimento}`, 'system', '', false);
+        document.getElementById("cartao-nome").value = "";
+        document.getElementById("cartao-fechamento").value = "";
+        document.getElementById("cartao-vencimento").value = "";
+    }
+
+    function finalizarOnboarding() {
+        if (contas.length === 0) {
+            alert("Cadastre pelo menos 1 conta para continuar");
+            return;
+        }
+        document.getElementById("modal-conta").style.display = "none";
+        document.getElementById("modal-cartao").style.display = "none";
+        localStorage.setItem("bankday_onboarding", "true");
+        onboardingCompleto = true;
+        checarOnboarding();
+        atualizar();
+    }
+
+    function toggleMenu() {
+        const menu = document.getElementById("menuDropdown");
+        menu.style.display = menu.style.display === "flex"? "none" : "flex";
+    }
+
+    document.addEventListener('click', (e) => {
+        const menu = document.getElementById("menuDropdown");
+        if (menu &&!e.target.closest('.icon-btn') &&!e.target.closest('.menu-dropdown')) {
+            menu.style.display = "none";
+        }
+    });
+
+    function abrirModalGerenciar() {
+        document.getElementById("menuDropdown").style.display = "none";
+        document.getElementById("modal-gerenciar").style.display = "flex";
+        renderAbaContas();
+    }
+
+    function fecharModalGerenciar() {
+        document.getElementById("modal-gerenciar").style.display = "none";
+    }
+
+    function trocarAbaGerenciar(tipo) {
+        document.getElementById("aba-btn-contas").classList.toggle("active", tipo === 'contas');
+        document.getElementById("aba-btn-cartoes").classList.toggle("active", tipo === 'cartoes');
+        document.getElementById("aba-contas").style.display = tipo === 'contas'? "block" : "none";
+        document.getElementById("aba-cartoes").style.display = tipo === 'cartoes'? "block" : "none";
+        if (tipo === 'contas') renderAbaContas(); else renderAbaCartoes();
+    }
+
+    function renderAbaContas() {
+        const div = document.getElementById("aba-contas");
+        let html = contas.map(c => {
+            const temLancamento = dados.some(d => d.banco === c.nome &&!d.isSaldoInicial);
+            return `
+                <div class="lista-item">
+                    <div class="lista-item-info">
+                        <strong>${c.nome}</strong>
+                        <span>Saldo inicial: R$ ${(c.saldoInicial || 0).toFixed(2)}</span>
+                    </div>
+                    <div class="lista-item-acoes">
+                        <button onclick="abrirEditarConta(${c.id})">✏️</button>
+                        <button onclick="excluirConta(${c.id})" ${temLancamento? 'disabled title="Possui lançamentos"' : ''}>🗑️</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        html += `<button onclick="abrirNovaConta()" style="width:100%;padding:10px;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer;margin-top:8px;">+ Nova conta</button>`;
+        div.innerHTML = html;
+    }
+
+    function renderAbaCartoes() {
+        const div = document.getElementById("aba-cartoes");
+        let html = cartoes.map(c => {
+            const temLancamento = dados.some(d => d.cartao === c.nome);
+            return `
+                <div class="lista-item">
+                    <div class="lista-item-info">
+                        <strong>${c.nome}</strong>
+                        <span>Fecha ${c.fechamento} | Vence ${c.vencimento} | ${c.bancoVinculado}</span>
+                    </div>
+                    <div class="lista-item-acoes">
+                        <button onclick="abrirEditarCartao(${c.id})">✏️</button>
+                        <button onclick="excluirCartao(${c.id})" ${temLancamento? 'disabled title="Possui lançamentos"' : ''}>🗑️</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        html += `<button onclick="abrirNovoCartao()" style="width:100%;padding:10px;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer;margin-top:8px;">+ Novo cartão</button>`;
+        div.innerHTML = html;
+    }
+
+    function abrirNovaConta() {
+        fecharModalGerenciar();
+        document.getElementById("modal-conta").style.display = "flex";
+        document.getElementById("titulo-modal-conta").textContent = "Nova conta";
+        document.getElementById("step-conta").style.display = "none";
+        document.getElementById("btn-pular-conta").style.display = "none";
+    }
+
+    function abrirNovoCartao() {
+        fecharModalGerenciar();
+        irParaCartoes();
+        document.querySelector('#modal-cartao.step').style.display = "none";
+    }
+
+    function abrirEditarConta(id) {
+        const c = contas.find(x => x.id === id);
+        editandoContaId = id;
+        document.getElementById("editar-conta-apelido").value = c.apelido;
+        document.getElementById("editar-conta-nome").value = c.nome;
+        document.getElementById("editar-conta-saldo").value = c.saldoInicial;
+        document.getElementById("modal-editar-conta").style.display = "flex";
+    }
+
+    function fecharModalEditarConta() {
+        document.getElementById("modal-editar-conta").style.display = "none";
+        editandoContaId = null;
+    }
+
+    function salvarEdicaoConta() {
+        const c = contas.find(x => x.id === editandoContaId);
+        const novoNome = cap(document.getElementById("editar-conta-nome").value.trim());
+        const novoSaldo = parseFloat(document.getElementById("editar-conta-saldo").value) || 0;
+        if (!novoNome) { alert("Nome não pode ficar vazio"); return; }
+
+        dados.forEach(d => {
+            if (d.banco === c.nome) d.banco = novoNome;
+        });
+
+        c.nome = novoNome;
+        c.saldoInicial = novoSaldo;
+
+        const saldoInicial = dados.find(d => d.isSaldoInicial && d.banco === c.apelido);
+        if (saldoInicial) {
+            saldoInicial.valor = novoSaldo;
+            saldoInicial.banco = novoNome;
+        }
+
+        salvar();
+        fecharModalEditarConta();
+        renderAbaContas();
+        renderSidebar();
+        atualizar();
+    }
+
+    function excluirConta(id) {
+        const c = contas.find(x => x.id === id);
+        if (dados.some(d => d.banco === c.nome &&!d.isSaldoInicial)) {
+            alert("Conta possui lançamentos. Exclua os lançamentos primeiro.");
+            return;
+        }
+        if (confirm(`Excluir conta ${c.nome}?`)) {
+            contas = contas.filter(x => x.id!== id);
+            dados = dados.filter(d => d.banco!== c.nome);
+            salvar();
+            renderAbaContas();
+            renderSidebar();
+            atualizar();
+        }
+    }
+
+    function abrirEditarCartao(id) {
+        const c = cartoes.find(x => x.id === id);
+        editandoCartaoId = id;
+        document.getElementById("editar-cartao-apelido").value = c.apelido;
+        document.getElementById("editar-cartao-nome").value = c.nome;
+        document.getElementById("editar-cartao-fechamento").value = c.fechamento;
+        document.getElementById("editar-cartao-vencimento").value = c.vencimento;
+        const select = document.getElementById("editar-cartao-banco");
+        select.innerHTML = contas.map(ct => `<option value="${ct.nome}" ${ct.nome === c.bancoVinculado? 'selected' : ''}>${ct.nome}</option>`).join('');
+        document.getElementById("modal-editar-cartao").style.display = "flex";
+    }
+
+    function fecharModalEditarCartao() {
+        document.getElementById("modal-editar-cartao").style.display = "none";
+        editandoCartaoId = null;
+    }
+
+    function salvarEdicaoCartao() {
+        const c = cartoes.find(x => x.id === editandoCartaoId);
+        const novoNome = cap(document.getElementById("editar-cartao-nome").value.trim());
+        if (!novoNome) { alert("Nome não pode ficar vazio"); return; }
+
+        dados.forEach(d => {
+            if (d.cartao === c.nome) d.cartao = novoNome;
+        });
+
+        c.nome = novoNome;
+        c.fechamento = parseInt(document.getElementById("editar-cartao-fechamento").value);
+        c.vencimento = parseInt(document.getElementById("editar-cartao-vencimento").value);
+        c.bancoVinculado = document.getElementById("editar-cartao-banco").value;
+
+        salvar();
+        fecharModalEditarCartao();
+        renderAbaCartoes();
+        atualizar();
+    }
+
+    function excluirCartao(id) {
+        const c = cartoes.find(x => x.id === id);
+        if (dados.some(d => d.cartao === c.nome)) {
+            alert("Cartão possui lançamentos. Exclua os lançamentos primeiro.");
+            return;
+        }
+        if (confirm(`Excluir cartão ${c.nome}?`)) {
+            cartoes = cartoes.filter(x => x.id!== id);
+            salvar();
+            renderAbaCartoes();
+        }
+    }
+
+    function abrirEditarTransacao(id) {
+        const t = dados.find(x => x.id === id);
+        if (!t || t.isSaldoInicial) return;
+        editandoTransacaoId = id;
+        document.getElementById("editar-transacao-valor").value = t.valor;
+        document.getElementById("editar-transacao-descricao").value = t.descricao;
+        document.getElementById("editar-transacao-tipo").value = t.tipo;
+        const select = document.getElementById("editar-transacao-conta");
+        select.innerHTML = contas.map(c => `<option value="${c.nome}" ${c.nome === t.banco? 'selected' : ''}>${c.nome}</option>`).join('');
+        document.getElementById("modal-editar-transacao").style.display = "flex";
+    }
+
+    function fecharModalEditarTransacao() {
+        document.getElementById("modal-editar-transacao").style.display = "none";
+        editandoTransacaoId = null;
+    }
+
+    function salvarEdicaoTransacao() {
+        const t = dados.find(x => x.id === editandoTransacaoId);
+        t.valor = parseFloat(document.getElementById("editar-transacao-valor").value);
+        t.descricao = document.getElementById("editar-transacao-descricao").value;
+        t.banco = document.getElementById("editar-transacao-conta").value;
+        t.tipo = document.getElementById("editar-transacao-tipo").value;
+        salvar();
+        fecharModalEditarTransacao();
+        atualizar();
+    }
+
+    function excluirTransacao() {
+        if (confirm("Excluir este lançamento?")) {
+            dados = dados.filter(x => x.id!== editandoTransacaoId);
+            salvar();
+            fecharModalEditarTransacao();
+            atualizar();
+        }
+    }
+
+    function abrirModalTransacoes(tipo) {
+        document.getElementById("menuDropdown").style.display = "none";
+        tipoTransacaoModal = tipo;
+        document.getElementById("titulo-transacoes").textContent = tipo === 'conta'? 'Transações por Conta' : 'Transações por Cartão';
+        const select = document.getElementById("filtro-transacoes");
+        const lista = tipo === 'conta'? contas : cartoes;
+        select.innerHTML = '<option value="">Todas</option>' + lista.map(x => `<option value="${x.nome}">${x.nome}</option>`).join('');
+        document.getElementById("modal-transacoes").style.display = "flex";
+        renderTransacoesFiltradas();
+    }
+
+    function fecharModalTransacoes() {
+        document.getElementById("modal-transacoes").style.display = "none";
+    }
+
+    function renderTransacoesFiltradas() {
+        const filtro = document.getElementById("filtro-transacoes").value;
+        const lista = document.getElementById("lista-transacoes");
+        let transacoes = dados.filter(d =>!d.isSaldoInicial);
+
+        if (tipoTransacaoModal === 'conta') {
+            if (filtro) transacoes = transacoes.filter(d => d.banco === filtro && d.metodo!== 'cartao');
+            else transacoes = transacoes.filter(d => d.metodo!== 'cartao');
+        } else {
+            if (filtro) transacoes = transacoes.filter(d => d.cartao === filtro);
+            else transacoes = transacoes.filter(d => d.metodo === 'cartao');
+        }
+
+        transacoes.sort((a,b) => new Date(b.data) - new Date(a.data));
+
+        let total = 0;
+        let html = '<table class="tabela-transacoes"><thead><tr><th>Data</th><th>Descrição</th><th>Valor</th></tr></thead><tbody>';
+        html += transacoes.map(t => {
+            const data = new Date(t.data).toLocaleDateString('pt-BR');
+            const sinal = t.tipo === 'entrada'? 1 : -1;
+            total += t.valor * sinal;
+            return `
+                <tr>
+                    <td>${data}</td>
+                    <td>${t.descricao}</td>
+                    <td class="${t.tipo === 'entrada'? 'valor-pos' : 'valor-neg'}">R$ ${t.valor.toFixed(2)}</td>
+                </tr>
+            `;
+        }).join('');
+        html += `</tbody><tfoot><tr><td colspan="2"><strong>Total</strong></td><td class="${total >= 0? 'valor-pos' : 'valor-neg'}"><strong>R$ ${Math.abs(total).toFixed(2)}</strong></td></tr></tfoot></table>`;
+        lista.innerHTML = html;
+    }
+
+   function perguntarCadastro(tipo, nome, callback) {
+    transacaoPendente = callback;
+    document.getElementById("pergunta-titulo").textContent = `${tipo} não encontrado`;
+    document.getElementById("pergunta-texto").textContent = tipo === 'Conta'?
+        `Conta '${nome}' não existe. Deseja cadastrar agora?` :
+        `Cartão '${nome}' não existe. Cadastre primeiro em ⋮ > Contas e Cartões`;
+    document.querySelectorAll('#modal-pergunta-cadastro button').forEach(btn => {
+        btn.style.display = tipo === 'Cartão' && btn.textContent === 'Sim, cadastrar'? 'none' : 'block';
+    });
+    document.getElementById("modal-pergunta-cadastro").style.display = "flex";
+}
+
+function responderPerguntaCadastro(cadastrar) {
+    document.getElementById("modal-pergunta-cadastro").style.display = "none";
+    if (transacaoPendente) {
+        if (cadastrar) {
+            // Agora abre o modal de cadastro direto
+            document.getElementById("modal-conta").style.display = "flex";
+            document.getElementById("titulo-modal-conta").textContent = "Nova conta";
+            document.getElementById("step-conta").style.display = "none";
+            document.getElementById("btn-pular-conta").style.display = "none";
+            transacaoPendente = null;
+        } else {
+            transacaoPendente(false);
+        }
+    }
+}
+
+    function enviarMsg() {
+        const texto = document.getElementById("inputValor").value.trim();
+        if (!texto) return;
+        document.getElementById("inputValor").value = "";
+        processarMsg(texto);
+    }
+
+    function processarMsg(texto) {
+        addMensagem(texto, 'user');
+        const txt = texto.toLowerCase();
+
+        let valor = null;
+        const numMatch = txt.match(/(\d+[\.,]?\d*)/);
+        if (numMatch) valor = parseFloat(numMatch[1].replace(',', '.'));
+        else valor = extensoParaNumero(txt);
+
+        if (!valor) {
+            addMensagem("Não entendi o valor. Use: Recebi 1000 nubank", 'system');
+            return;
+        }
+
+        let bancoMencionado = null;
+        let cartaoMencionado = null;
+
+        contas.forEach(c => {
+            if (txt.includes(c.nome.toLowerCase())) bancoMencionado = c.nome;
+        });
+        cartoes.forEach(c => {
+            if (txt.includes(c.nome.toLowerCase())) cartaoMencionado = c.nome;
+        });
+
+        let tipo = null;
+        let metodo = 'saldo';
+        let descricao = texto;
+
+        if (txt.includes('recebi') || txt.includes('entrada')) tipo = 'entrada';
+        else if (txt.includes('gastei') || txt.includes('saida') || txt.includes('paguei')) tipo = 'saida';
+        else if (txt.includes('comprei') || txt.includes('cartao') || txt.includes('cartão')) {
+            tipo = 'saida';
+            metodo = 'cartao';
+        }
+
+        if (!tipo) {
+            addMensagem("Use: Recebi | Gastei | Comprei no cartão", 'system');
+            return;
+        }
+
+        if (metodo === 'saldo') {
+            if (bancoMencionado &&!contas.find(c => c.nome.toLowerCase() === bancoMencionado.toLowerCase())) {
+                perguntarCadastro('Conta', bancoMencionado, (continuar) => {
+                    if (!continuar) {
+                        const contaPrincipal = contas[0].nome;
+                        criarLancamento(valor, tipo, metodo, contaPrincipal, descricao);
+                        addMensagem(`Conta '${bancoMencionado}' não encontrada. Lancei no ${contaPrincipal}`, 'system');
+                    }
+                });
+                return;
+            }
+            if (!bancoMencionado) bancoMencionado = contas[0].nome;
+            criarLancamento(valor, tipo, metodo, bancoMencionado, descricao);
+        }
+
+        if (metodo === 'cartao') {
+            if (!cartaoMencionado) {
+                addMensagem("Qual cartão? Ex: Comprei no cartão nubank 200", 'system');
+                return;
+            }
+            if (!cartoes.find(c => c.nome.toLowerCase() === cartaoMencionado.toLowerCase())) {
+                perguntarCadastro('Cartão', cartaoMencionado, null);
+                return;
+            }
+            const cartao = cartoes.find(c => c.nome.toLowerCase() === cartaoMencionado.toLowerCase());
+            criarLancamento(valor, tipo, metodo, cartao.bancoVinculado, descricao, cartao.nome);
+        }
+    }
+
+    function criarLancamento(valor, tipo, metodo, banco, descricao, cartao = null) {
+        const transacao = {
+            id: Date.now(),
+            valor: valor,
+            tipo: tipo,
+            metodo: metodo,
+            banco: banco,
+            cartao: cartao,
+            descricao: descricao,
+            data: mesAtual.toISOString(),
+            texto: descricao
+        };
+        dados.push(transacao);
+        salvar();
+        atualizar();
+        addMensagem(`Lançamento registrado: R$ ${valor.toFixed(2)}`, 'system', `Conta: ${banco}${cartao? ' | Cartão: ' + cartao : ''}`, true, transacao.id);
+    }
+
+    function abrirReset() {
+        document.getElementById("menuDropdown").style.display = "none";
+        document.getElementById("modal-reset").style.display = "flex";
+    }
+
+    function fecharReset() {
+        document.getElementById("modal-reset").style.display = "none";
+    }
+
+    function resetarTransacoes() {
+        if (confirm("Apagar todas as transações?")) {
+            dados = dados.filter(d => d.isSaldoInicial);
+            salvar();
+            fecharReset();
+            atualizar();
+            addMensagem("Transações apagadas", 'system');
+        }
+    }
+
+    function resetarTudo() {
+        if (confirm("Apagar TUDO? Contas, cartões e transações?")) {
+            dados = [];
+            contas = [];
+            cartoes = [];
+            localStorage.removeItem("bankday_onboarding");
+            salvar();
+            location.reload();
+        }
+    }
+
+    function calcularSaldoAnterior() {
+        if (!config.projetarSaldo) return 0;
+        const mesAnterior = new Date(mesAtual);
+        mesAnterior.setMonth(mesAnterior.getMonth() - 1);
+        let saldo = 0;
+        contas.forEach(c => { saldo += c.saldoInicial || 0; });
+        dados.forEach(d => {
+            if (d.isSaldoInicial) return;
+            const data = new Date(d.data);
+            if (data.getFullYear() < mesAnterior.getFullYear() ||
+               (data.getFullYear() === mesAnterior.getFullYear() && data.getMonth() <= mesAnterior.getMonth())) {
+                saldo += d.tipo === 'entrada'? d.valor : -d.valor;
+            }
+        });
+        return saldo;
+    }
+
+    function calcularSaldoConta(nomeConta) {
+        const conta = contas.find(c => c.nome === nomeConta);
+        if (!conta) return 0;
+        let saldo = conta.saldoInicial || 0;
+        dados.filter(d => d.banco === nomeConta &&!d.isSaldoInicial).forEach(d => {
+            saldo += d.tipo === 'entrada'? d.valor : -d.valor;
+        });
+        return saldo;
+    }
+
+    function renderSidebar() {
+        const div = document.getElementById("sidebar-content");
+        if (!div) return;
+        let html = contas.map(c => {
+            const saldoConta = calcularSaldoConta(c.nome);
+            const ativo = contaSelecionadaSidebar === c.nome? 'active' : '';
+            return `
+                <div class="sidebar-item ${ativo}" onclick="selecionarConta('${c.nome}')">
+                    <div class="sidebar-item-info">
+                        <strong>${c.nome}</strong>
+                        <span>Conta</span>
+                    </div>
+                    <div class="sidebar-item-valor ${saldoConta >= 0? 'positivo' : 'negativo'}">
+                        R$ ${(saldoConta || 0).toFixed(2)}
+                    </div>
+                </div>
+            `;
+        }).join('');
+        div.innerHTML = html;
+    }
+
+    function selecionarConta(nome) {
+        contaSelecionadaSidebar = nome;
+        document.getElementById("conta-selecionada").textContent = nome;
+        renderSidebar();
+    }
+
+    function atualizar() {
+        const mes = mesAtual.getMonth();
+        const ano = mesAtual.getFullYear();
+        document.getElementById("mesAtual").textContent = mesAtual.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
+        const dadosMes = dados.filter(d => {
+            const dt = new Date(d.data);
+            return dt.getMonth() === mes && dt.getFullYear() === ano;
+        });
+
+        let entradas = 0, saidas = 0, fatura = 0;
+        dadosMes.forEach(d => {
+            if (d.isSaldoInicial) return;
+            if (d.metodo === 'cartao') fatura += d.valor;
+            else if (d.tipo === 'entrada') entradas += d.valor;
+            else saidas += d.valor;
+        });
+
+        const saldoProjetado = calcularSaldoAnterior();
+        const saldoMes = entradas - saidas + saldoProjetado;
+
+        document.getElementById("totalEntradas").textContent = mostrar? `R$ ${entradas.toFixed(2)}` : 'R$ •••••';
+        document.getElementById("totalSaidas").textContent = mostrar? `R$ ${saidas.toFixed(2)}` : 'R$ •••••';
+        document.getElementById("totalFatura").textContent = mostrar? `R$ ${fatura.toFixed(2)}` : 'R$ •••••';
+        document.getElementById("saldoMes").textContent = mostrar? `R$ ${saldoMes.toFixed(2)}` : 'R$ •••••';
+        document.getElementById("saldoMes").className = saldoMes >= 0? 'positivo' : 'negativo';
+
+        config.projetarSaldo = document.getElementById("projetarSaldo").checked;
+        salvar();
+        renderSidebar();
+    }
+
+    function mudarMes(delta) {
+        mesAtual.setMonth(mesAtual.getMonth() + delta);
+        atualizar();
+        document.getElementById("chat-area").innerHTML = '';
+    }
+
+    window.onload = () => {
+       const tema = localStorage.getItem("bankday_tema");
+        if (tema === "dark") {
+            document.body.classList.add("dark");
+            document.getElementById("btnTema").textContent = "☀️";
+        }
+        
+        // Força liberação do input se já tem conta cadastrada
+        if (contas.length > 0 && !onboardingCompleto) {
+            localStorage.setItem("bankday_onboarding", "true");
+            onboardingCompleto = true;
+        }
+        
+        checarOnboarding();
+        atualizar(); // Chama a nova função de cálculo
+        };
+     
+  
+    function toggleMenu() {
+        const menu = document.getElementById("menuDropdown");
+        menu.style.display = menu.style.display === "flex"? "none" : "flex";
+    }
+
+    document.addEventListener('click', (e) => {
+        const menu = document.getElementById("menuDropdown");
+        if (menu &&!e.target.closest('.icon-btn') &&!e.target.closest('.menu-dropdown')) {
+            menu.style.display = "none";
+        }
+    });
+
+    function abrirModalGerenciar() {
+        document.getElementById("menuDropdown").style.display = "none";
+        document.getElementById("modal-gerenciar").style.display = "flex";
+        renderAbaContas();
+    }
+
+    function fecharModalGerenciar() {
+        document.getElementById("modal-gerenciar").style.display = "none";
+    }
+
+    function trocarAbaGerenciar(tipo) {
+        document.getElementById("aba-btn-contas").classList.toggle("active", tipo === 'contas');
+        document.getElementById("aba-btn-cartoes").classList.toggle("active", tipo === 'cartoes');
+        document.getElementById("aba-contas").style.display = tipo === 'contas'? "block" : "none";
+        document.getElementById("aba-cartoes").style.display = tipo === 'cartoes'? "block" : "none";
+        if (tipo === 'contas') renderAbaContas(); else renderAbaCartoes();
+    }
+
+function renderAbaContas() {
+        const div = document.getElementById("aba-contas");
+        let html = contas.map(c => {
+            const temLancamento = dados.some(d => d.banco === c.nome &&!d.isSaldoInicial);
+            return `
+                <div class="lista-item">
+                    <div class="lista-item-info">
+                        <strong>${c.nome}</strong>
+                        <span>Saldo inicial: R$ ${(c.saldoInicial || 0).toFixed(2)}</span>
+                    </div>
+                    <div class="lista-item-acoes">
+                        <button onclick="abrirEditarConta(${c.id})">✏️</button>
+                        <button onclick="excluirConta(${c.id})" ${temLancamento? 'disabled title="Possui lançamentos"' : ''}>🗑️</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        html += `<button onclick="abrirNovaConta()" style="width:100%;padding:10px;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer;margin-top:8px;">+ Nova conta</button>`;
+        div.innerHTML = html;
+    }
+
+    function renderAbaCartoes() {
+        const div = document.getElementById("aba-cartoes");
+        let html = cartoes.map(c => {
+            const temLancamento = dados.some(d => d.cartao === c.nome);
+            return `
+                <div class="lista-item">
+                    <div class="lista-item-info">
+                        <strong>${c.nome}</strong>
+                        <span>Fecha ${c.fechamento} | Vence ${c.vencimento} | ${c.bancoVinculado}</span>
+                    </div>
+                    <div class="lista-item-acoes">
+                        <button onclick="abrirEditarCartao(${c.id})">✏️</button>
+                        <button onclick="excluirCartao(${c.id})" ${temLancamento? 'disabled title="Possui lançamentos"' : ''}>🗑️</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        html += `<button onclick="abrirNovoCartao()" style="width:100%;padding:10px;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer;margin-top:8px;">+ Novo cartão</button>`;
+        div.innerHTML = html;
+    }
+
+    function abrirNovaConta() {
+        fecharModalGerenciar();
+        document.getElementById("modal-conta").style.display = "flex";
+        document.getElementById("titulo-modal-conta").textContent = "Nova conta";
+        document.getElementById("step-conta").style.display = "none";
+        document.getElementById("btn-pular-conta").style.display = "none";
+    }
+
+    function abrirNovoCartao() {
+        fecharModalGerenciar();
+        irParaCartoes();
+        document.querySelector('#modal-cartao.step').style.display = "none";
+    }
+
+    function abrirEditarConta(id) {
+        const c = contas.find(x => x.id === id);
+        editandoContaId = id;
+        document.getElementById("editar-conta-apelido").value = c.apelido;
+        document.getElementById("editar-conta-nome").value = c.nome;
+        document.getElementById("editar-conta-saldo").value = c.saldoInicial;
+        document.getElementById("modal-editar-conta").style.display = "flex";
+    }
+
+    function fecharModalEditarConta() {
+        document.getElementById("modal-editar-conta").style.display = "none";
+        editandoContaId = null;
+    }
+
+    function salvarEdicaoConta() {
+        const c = contas.find(x => x.id === editandoContaId);
+        const novoNome = cap(document.getElementById("editar-conta-nome").value.trim());
+        const novoSaldo = parseFloat(document.getElementById("editar-conta-saldo").value) || 0;
+        if (!novoNome) { alert("Nome não pode ficar vazio"); return; }
+
+        dados.forEach(d => {
+            if (d.banco === c.nome) d.banco = novoNome;
+        });
+
+        c.nome = novoNome;
+        c.saldoInicial = novoSaldo;
+
+        const saldoInicial = dados.find(d => d.isSaldoInicial && d.banco === c.apelido);
+        if (saldoInicial) {
+            saldoInicial.valor = novoSaldo;
+            saldoInicial.banco = novoNome;
+        }
+
+        salvar();
+        fecharModalEditarConta();
+        renderAbaContas();
+        renderSidebar();
+        atualizar();
+    }
+
+    function excluirConta(id) {
+        const c = contas.find(x => x.id === id);
+        if (dados.some(d => d.banco === c.nome &&!d.isSaldoInicial)) {
+            alert("Conta possui lançamentos. Exclua os lançamentos primeiro.");
+            return;
+        }
+        if (confirm(`Excluir conta ${c.nome}?`)) {
+            contas = contas.filter(x => x.id!== id);
+            dados = dados.filter(d => d.banco!== c.nome);
+            salvar();
+            renderAbaContas();
+            renderSidebar();
+            atualizar();
+        }
+    }
+
+    function abrirEditarCartao(id) {
+        const c = cartoes.find(x => x.id === id);
+        editandoCartaoId = id;
+        document.getElementById("editar-cartao-apelido").value = c.apelido;
+        document.getElementById("editar-cartao-nome").value = c.nome;
+        document.getElementById("editar-cartao-fechamento").value = c.fechamento;
+        document.getElementById("editar-cartao-vencimento").value = c.vencimento;
+        const select = document.getElementById("editar-cartao-banco");
+        select.innerHTML = contas.map(ct => `<option value="${ct.nome}" ${ct.nome === c.bancoVinculado? 'selected' : ''}>${ct.nome}</option>`).join('');
+        document.getElementById("modal-editar-cartao").style.display = "flex";
+    }
+
+    function fecharModalEditarCartao() {
+        document.getElementById("modal-editar-cartao").style.display = "none";
+        editandoCartaoId = null;
+    }
+
+    function salvarEdicaoCartao() {
+        const c = cartoes.find(x => x.id === editandoCartaoId);
+        const novoNome = cap(document.getElementById("editar-cartao-nome").value.trim());
+        if (!novoNome) { alert("Nome não pode ficar vazio"); return; }
+
+        dados.forEach(d => {
+            if (d.cartao === c.nome) d.cartao = novoNome;
+        });
+
+        c.nome = novoNome;
+        c.fechamento = parseInt(document.getElementById("editar-cartao-fechamento").value);
+        c.vencimento = parseInt(document.getElementById("editar-cartao-vencimento").value);
+        c.bancoVinculado = document.getElementById("editar-cartao-banco").value;
+
+        salvar();
+        fecharModalEditarCartao();
+        renderAbaCartoes();
+        atualizar();
+    }
+
+    function excluirCartao(id) {
+        const c = cartoes.find(x => x.id === id);
+        if (dados.some(d => d.cartao === c.nome)) {
+            alert("Cartão possui lançamentos. Exclua os lançamentos primeiro.");
+            return;
+        }
+        if (confirm(`Excluir cartão ${c.nome}?`)) {
+            cartoes = cartoes.filter(x => x.id!== id);
+            salvar();
+            renderAbaCartoes();
+        }
+    }
+
+    function abrirEditarTransacao(id) {
+        const t = dados.find(x => x.id === id);
+        if (!t || t.isSaldoInicial) return;
+        editandoTransacaoId = id;
+        document.getElementById("editar-transacao-valor").value = t.valor;
+        document.getElementById("editar-transacao-descricao").value = t.descricao;
+        document.getElementById("editar-transacao-tipo").value = t.tipo;
+        const select = document.getElementById("editar-transacao-conta");
+        select.innerHTML = contas.map(c => `<option value="${c.nome}" ${c.nome === t.banco? 'selected' : ''}>${c.nome}</option>`).join('');
+        document.getElementById("modal-editar-transacao").style.display = "flex";
+    }
+
+    function fecharModalEditarTransacao() {
+        document.getElementById("modal-editar-transacao").style.display = "none";
+        editandoTransacaoId = null;
+    }
+
+    function salvarEdicaoTransacao() {
+        const t = dados.find(x => x.id === editandoTransacaoId);
+        t.valor = parseFloat(document.getElementById("editar-transacao-valor").value);
+        t.descricao = document.getElementById("editar-transacao-descricao").value;
+        t.banco = document.getElementById("editar-transacao-conta").value;
+        t.tipo = document.getElementById("editar-transacao-tipo").value;
+        salvar();
+        fecharModalEditarTransacao();
+        atualizar();
+    }
+
+    function excluirTransacao() {
+        if (confirm("Excluir este lançamento?")) {
+            dados = dados.filter(x => x.id!== editandoTransacaoId);
+            salvar();
+            fecharModalEditarTransacao();
+            atualizar();
+        }
+    }
+
+    function abrirModalTransacoes(tipo) {
+        document.getElementById("menuDropdown").style.display = "none";
+        tipoTransacaoModal = tipo;
+        document.getElementById("titulo-transacoes").textContent = tipo === 'conta'? 'Transações por Conta' : 'Transações por Cartão';
+        const select = document.getElementById("filtro-transacoes");
+        const lista = tipo === 'conta'? contas : cartoes;
+        select.innerHTML = '<option value="">Todas</option>' + lista.map(x => `<option value="${x.nome}">${x.nome}</option>`).join('');
+        document.getElementById("modal-transacoes").style.display = "flex";
+        renderTransacoesFiltradas();
+    }
+
+    function fecharModalTransacoes() {
+        document.getElementById("modal-transacoes").style.display = "none";
+    }
+
+    function renderTransacoesFiltradas() {
+        const filtro = document.getElementById("filtro-transacoes").value;
+        const lista = document.getElementById("lista-transacoes");
+        let transacoes = dados.filter(d =>!d.isSaldoInicial);
+
+        if (tipoTransacaoModal === 'conta') {
+            if (filtro) transacoes = transacoes.filter(d => d.banco === filtro && d.metodo!== 'cartao');
+            else transacoes = transacoes.filter(d => d.metodo!== 'cartao');
+        } else {
+            if (filtro) transacoes = transacoes.filter(d => d.cartao === filtro);
+            else transacoes = transacoes.filter(d => d.metodo === 'cartao');
+        }
+
+        transacoes.sort((a,b) => new Date(b.data) - new Date(a.data));
+
+        let total = 0;
+        let html = '<table class="tabela-transacoes"><thead><tr><th>Data</th><th>Descrição</th><th>Valor</th></tr></thead><tbody>';
+        html += transacoes.map(t => {
+            const data = new Date(t.data).toLocaleDateString('pt-BR');
+            const sinal = t.tipo === 'entrada'? 1 : -1;
+            total += t.valor * sinal;
+            return `
+                <tr>
+                    <td>${data}</td>
+                    <td>${t.descricao}</td>
+                    <td class="${t.tipo === 'entrada'? 'valor-pos' : 'valor-neg'}">R$ ${t.valor.toFixed(2)}</td>
+                </tr>
+            `;
+        }).join('');
+        html += `</tbody><tfoot><tr><td colspan="2"><strong>Total</strong></td><td class="${total >= 0? 'valor-pos' : 'valor-neg'}"><strong>R$ ${Math.abs(total).toFixed(2)}</strong></td></tr></tfoot></table>`;
+        lista.innerHTML = html;
+    }
+
+    function perguntarCadastro(tipo, nome, callback) {
+        transacaoPendente = callback;
+        document.getElementById("pergunta-titulo").textContent = `${tipo} não encontrado`;
+        document.getElementById("pergunta-texto").textContent = tipo === 'Conta'?
+            `Conta '${nome}' não existe. Deseja cadastrar?` :
+            `Cartão '${nome}' não existe. Favor cadastrar primeiro em ⋮ > Contas e Cartões`;
+        document.querySelectorAll('#modal-pergunta-cadastro button').forEach(btn => {
+            btn.style.display = tipo === 'Cartão' && btn.textContent === 'Sim, cadastrar'? 'none' : 'block';
+        });
+        document.getElementById("modal-pergunta-cadastro").style.display = "flex";
+    }
+
+    function responderPerguntaCadastro(cadastrar) {
+        document.getElementById("modal-pergunta-cadastro").style.display = "none";
+        if (transacaoPendente) {
+            if (cadastrar) {
+                addMensagem("Cancele e cadastre em ⋮ > Contas e Cartões", 'system');
+                transacaoPendente = null;
+            } else {
+                transacaoPendente(false);
+            }
+        }
+    }
+
+    function enviarMsg() {
+        const texto = document.getElementById("inputValor").value.trim();
+        if (!texto) return;
+        document.getElementById("inputValor").value = "";
+        processarMsg(texto);
+    }
+
+    function processarMsg(texto) {
+        addMensagem(texto, 'user');
+        const txt = texto.toLowerCase();
+
+        let valor = null;
+        const numMatch = txt.match(/(\d+[\.,]?\d*)/);
+        if (numMatch) valor = parseFloat(numMatch[1].replace(',', '.'));
+        else valor = extensoParaNumero(txt);
+
+        if (!valor) {
+            addMensagem("Não entendi o valor. Use: Recebi 1000 nubank", 'system');
+            return;
+        }
+
+        let bancoMencionado = null;
+        let cartaoMencionado = null;
+
+        contas.forEach(c => {
+            if (txt.includes(c.nome.toLowerCase())) bancoMencionado = c.nome;
+        });
+        cartoes.forEach(c => {
+            if (txt.includes(c.nome.toLowerCase())) cartaoMencionado = c.nome;
+        });
+
+        let tipo = null;
+        let metodo = 'saldo';
+        let descricao = texto;
+
+        if (txt.includes('recebi') || txt.includes('entrada')) tipo = 'entrada';
+        else if (txt.includes('gastei') || txt.includes('saida') || txt.includes('paguei')) tipo = 'saida';
+        else if (txt.includes('comprei') || txt.includes('cartao') || txt.includes('cartão')) {
+            tipo = 'saida';
+            metodo = 'cartao';
+        }
+
+        if (!tipo) {
+            addMensagem("Use: Recebi | Gastei | Comprei no cartão", 'system');
+            return;
+        }
+
+        if (metodo === 'saldo') {
+            if (bancoMencionado &&!contas.find(c => c.nome.toLowerCase() === bancoMencionado.toLowerCase())) {
+                perguntarCadastro('Conta', bancoMencionado, (continuar) => {
+                    if (!continuar) {
+                        const contaPrincipal = contas[0].nome;
+                        criarLancamento(valor, tipo, metodo, contaPrincipal, descricao);
+                        addMensagem(`Conta '${bancoMencionado}' não encontrada. Lancei no ${contaPrincipal}`, 'system');
+                    }
+                });
+                return;
+            }
+            if (!bancoMencionado) bancoMencionado = contas[0].nome;
+            criarLancamento(valor, tipo, metodo, bancoMencionado, descricao);
+        }
+
+        if (metodo === 'cartao') {
+            if (!cartaoMencionado) {
+                addMensagem("Qual cartão? Ex: Comprei no cartão nubank 200", 'system');
+                return;
+            }
+            if (!cartoes.find(c => c.nome.toLowerCase() === cartaoMencionado.toLowerCase())) {
+                perguntarCadastro('Cartão', cartaoMencionado, null);
+                return;
+            }
+            const cartao = cartoes.find(c => c.nome.toLowerCase() === cartaoMencionado.toLowerCase());
+            criarLancamento(valor, tipo, metodo, cartao.bancoVinculado, descricao, cartao.nome);
+        }
+    }
+
+    function criarLancamento(valor, tipo, metodo, banco, descricao, cartao = null) {
+        const transacao = {
+            id: Date.now(),
+            valor: valor,
+            tipo: tipo,
+            metodo: metodo,
+            banco: banco,
+            cartao: cartao,
+            descricao: descricao,
+            data: mesAtual.toISOString(),
+            texto: descricao
+        };
+        dados.push(transacao);
+        salvar();
+        atualizar();
+        addMensagem(`Lançamento registrado: R$ ${valor.toFixed(2)}`, 'system', `Conta: ${banco}${cartao? ' | Cartão: ' + cartao : ''}`, true, transacao.id);
+    }
+
+    function abrirReset() {
+        document.getElementById("menuDropdown").style.display = "none";
+        document.getElementById("modal-reset").style.display = "flex";
+    }
+
+    function fecharReset() {
+        document.getElementById("modal-reset").style.display = "none";
+    }
+
+    function resetarTransacoes() {
+        if (confirm("Apagar todas as transações?")) {
+            dados = dados.filter(d => d.isSaldoInicial);
+            salvar();
+            fecharReset();
+            atualizar();
+            addMensagem("Transações apagadas", 'system');
+        }
+    }
+
+    function resetarTudo() {
+        if (confirm("Apagar TUDO? Contas, cartões e transações?")) {
+            dados = [];
+            contas = [];
+            cartoes = [];
+            localStorage.removeItem("bankday_onboarding");
+            salvar();
+            location.reload();
+        }
+    }
+
+    function calcularSaldoAnterior() {
+        if (!config.projetarSaldo) return 0;
+        const mesAnterior = new Date(mesAtual);
+        mesAnterior.setMonth(mesAnterior.getMonth() - 1);
+        let saldo = 0;
+        contas.forEach(c => { saldo += c.saldoInicial || 0; });
+        dados.forEach(d => {
+            if (d.isSaldoInicial) return;
+            const data = new Date(d.data);
+            if (data.getFullYear() < mesAnterior.getFullYear() ||
+               (data.getFullYear() === mesAnterior.getFullYear() && data.getMonth() <= mesAnterior.getMonth())) {
+                saldo += d.tipo === 'entrada'? d.valor : -d.valor;
+            }
+        });
+        return saldo;
+    }
+
+    function calcularSaldoConta(nomeConta) {
+        const conta = contas.find(c => c.nome === nomeConta);
+        if (!conta) return 0;
+        let saldo = conta.saldoInicial || 0;
+        dados.filter(d => d.banco === nomeConta &&!d.isSaldoInicial).forEach(d => {
+            saldo += d.tipo === 'entrada'? d.valor : -d.valor;
+        });
+        return saldo;
+    }
+
+    function renderSidebar() {
+        const div = document.getElementById("sidebar-content");
+        if (!div) return;
+        let html = contas.map(c => {
+            const saldoConta = calcularSaldoConta(c.nome);
+            const ativo = contaSelecionadaSidebar === c.nome? 'active' : '';
+            return `
+                <div class="sidebar-item ${ativo}" onclick="selecionarConta('${c.nome}')">
+                    <div class="sidebar-item-info">
+                        <strong>${c.nome}</strong>
+                        <span>Conta</span>
+                    </div>
+                    <div class="sidebar-item-valor ${saldoConta >= 0? 'positivo' : 'negativo'}">
+                        R$ ${(saldoConta || 0).toFixed(2)}
+                    </div>
+                </div>
+            `;
+        }).join('');
+        div.innerHTML = html;
+    }
+
+    function selecionarConta(nome) {
+        contaSelecionadaSidebar = nome;
+        document.getElementById("conta-selecionada").textContent = nome;
+        renderSidebar();
+    }
+
+    function atualizar() {
+    const mes = mesAtual.getMonth();
+    const ano = mesAtual.getFullYear();
+    document.getElementById("mesAtual").textContent = mesAtual.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
+    const dadosMes = dados.filter(d => {
+        const dt = new Date(d.data);
+        return dt.getMonth() === mes && dt.getFullYear() === ano;
+    });
+
+    let entradas = 0, saidas = 0, fatura = 0, saldoInicialMes = 0;
+    
+    dadosMes.forEach(d => {
+        if (d.isSaldoInicial) {
+            saldoInicialMes += d.valor;
+            return;
+        }
+        if (d.metodo === 'cartao') fatura += d.valor;
+        else if (d.tipo === 'entrada') entradas += d.valor;
+        else saidas += d.valor;
+    });
+
+    const saldoMes = saldoInicialMes + entradas - saidas;
+
+    // Atualiza o DOM
+    document.getElementById("totalEntradas").textContent = mostrar ? `R$ ${entradas.toFixed(2)}` : 'R$ •••••';
+    document.getElementById("totalSaidas").textContent = mostrar ? `R$ ${saidas.toFixed(2)}` : 'R$ •••••';
+    document.getElementById("totalFatura").textContent = mostrar ? `R$ ${fatura.toFixed(2)}` : 'R$ •••••';
+    document.getElementById("saldoMes").textContent = mostrar ? `R$ ${saldoMes.toFixed(2)}` : 'R$ •••••';
+    document.getElementById("saldoMes").className = saldoMes >= 0 ? 'positivo' : 'negativo';
+
+    // Salva a configuração do checkbox
+    config.projetarSaldo = document.getElementById("projetarSaldo").checked;
+    
+    // Persistência e Atualização da Barra Lateral
+    salvar();
+    if (typeof renderSidebar === "function") {
+        renderSidebar();
+    }
+}
+    function mudarMes(delta) {
+        mesAtual.setMonth(mesAtual.getMonth() + delta);
+        atualizar();
+        document.getElementById("chat-area").innerHTML = '';
+    }
+
+    window.onload = () => {
+        const tema = localStorage.getItem("bankday_tema");
+        if (tema === "dark") {
+            document.body.classList.add("dark");
+            document.getElementById("btnTema").textContent = "☀️";
+        }
+        checarOnboarding();
+        atualizar();
+    };
+    
+        </script>
+
+<div id="modal-conta" class="modal">
+    <div class="modal-content">
+        <span class="step" id="step-conta">Passo 1 de 2</span>
+        <h3 id="titulo-modal-conta">Cadastre sua primeira conta</h3>
+        <p>O saldo inicial é obrigatório pra gente calcular tudo certo.</p>
+        <label>Nome do Banco/Conta</label>
+        <input type="text" id="conta-nome" placeholder="Ex: Itaú, Nubank, Carteira">
+        <label>Saldo Inicial</label>
+        <input type="number" step="0.01" id="conta-saldo" placeholder="0.00">
+        <div class="modal-botoes">
+            <button id="btn-pular-conta" onclick="irParaCartoes()">Ir para Cartões</button>
+            <button onclick="salvarConta()">Salvar Conta</button>
+        </div>
+        <button onclick="finalizarOnboarding()" style="margin-top:8px;background:none;border:1px solid var(--border);color:var(--text);padding:10px;border-radius:6px;cursor:pointer;">Finalizar</button>
+    </div>
+</div>
+
+<div id="modal-cartao" class="modal">
+    <div class="modal-content">
+        <span class="step">Passo 2 de 2</span>
+        <h3>Cadastre seus cartões de crédito</h3>
+        <p>Informe o dia que a fatura fecha e o dia do vencimento.</p>
+        <label>Nome do Cartão</label>
+        <input type="text" id="cartao-nome" placeholder="Ex: Nubank, Itaú Visa">
+        <label>Dia do Fechamento</label>
+        <input type="number" min="1" max="31" id="cartao-fechamento" placeholder="Ex: 5">
+        <label>Dia do Vencimento</label>
+        <input type="number" min="1" max="31" id="cartao-vencimento" placeholder="Ex: 10">
+        <label>Banco para débito da fatura</label>
+        <select id="cartao-banco"></select>
+        <div class="modal-botoes">
+            <button onclick="finalizarOnboarding()">Pular</button>
+            <button onclick="salvarCartao()">Salvar Cartão</button>
+        </div>
+        <button onclick="finalizarOnboarding()" style="margin-top:8px;background:none;border:1px solid var(--border);color:var(--text);padding:10px;border-radius:6px;cursor:pointer;">Finalizar</button>
+    </div>
+</div>
+
+<div id="modal-reset" class="modal">
+    <div class="modal-content">
+        <h3>Resetar dados</h3>
+        <p>Escolha o que deseja apagar. Esta ação não pode ser desfeita.</p>
+        <div class="modal-botoes">
+            <button onclick="resetarTransacoes()" class="danger">Só Transações</button>
+            <button onclick="resetarTudo()" class="danger">Tudo</button>
+        </div>
+        <div class="modal-botoes">
+            <button onclick="fecharReset()">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-gerenciar" class="modal">
+    <div class="modal-content">
+        <h3>Contas e Cartões</h3>
+        <div class="tabs">
+            <button class="active" onclick="trocarAbaGerenciar('contas')" id="aba-btn-contas">Contas</button>
+            <button onclick="trocarAbaGerenciar('cartoes')" id="aba-btn-cartoes">Cartões</button>
+        </div>
+        <div id="aba-contas"></div>
+        <div id="aba-cartoes" style="display:none;"></div>
+        <div class="modal-botoes">
+            <button onclick="fecharModalGerenciar()">Fechar</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-editar-conta" class="modal">
+    <div class="modal-content">
+        <h3>Editar Conta</h3>
+        <label>Apelido</label>
+        <input type="text" id="editar-conta-apelido" disabled>
+        <label>Nome atual</label>
+        <input type="text" id="editar-conta-nome">
+        <label>Saldo inicial</label>
+        <input type="number" step="0.01" id="editar-conta-saldo">
+        <div class="modal-botoes">
+            <button onclick="fecharModalEditarConta()">Cancelar</button>
+            <button onclick="salvarEdicaoConta()">Salvar</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-editar-cartao" class="modal">
+    <div class="modal-content">
+        <h3>Editar Cartão</h3>
+        <label>Apelido</label>
+        <input type="text" id="editar-cartao-apelido" disabled>
+        <label>Nome atual</label>
+        <input type="text" id="editar-cartao-nome">
+        <label>Dia do Fechamento</label>
+        <input type="number" min="1" max="31" id="editar-cartao-fechamento">
+        <label>Dia do Vencimento</label>
+        <input type="number" min="1" max="31" id="editar-cartao-vencimento">
+        <label>Banco para débito</label>
+        <select id="editar-cartao-banco"></select>
+        <div class="modal-botoes">
+            <button onclick="fecharModalEditarCartao()">Cancelar</button>
+            <button onclick="salvarEdicaoCartao()">Salvar</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-editar-transacao" class="modal">
+    <div class="modal-content">
+        <h3>Editar Lançamento</h3>
+        <label>Valor</label>
+        <input type="number" step="0.01" id="editar-transacao-valor">
+        <label>Descrição</label>
+        <input type="text" id="editar-transacao-descricao">
+        <label>Conta</label>
+        <select id="editar-transacao-conta"></select>
+        <label>Tipo</label>
+        <select id="editar-transacao-tipo">
+            <option value="entrada">Entrada</option>
+            <option value="saida">Saída</option>
+        </select>
+        <div class="modal-botoes">
+            <button onclick="excluirTransacao()" class="danger">Excluir</button>
+            <button onclick="salvarEdicaoTransacao()">Salvar</button>
+        </div>
+        <button onclick="fecharModalEditarTransacao()" style="margin-top:8px;background:none;border:1px solid var(--border);color:var(--text);padding:10px;border-radius:6px;cursor:pointer;">Cancelar</button>
+    </div>
+</div>
+
+<div id="modal-transacoes" class="modal">
+    <div class="modal-content">
+        <h3 id="titulo-transacoes">Transações</h3>
+        <label>Filtrar por:</label>
+        <select id="filtro-transacoes" onchange="renderTransacoesFiltradas()"></select>
+        <div id="lista-transacoes" style="max-height:400px;overflow-y:auto;margin-top:12px;"></div>
+        <div class="modal-botoes">
+            <button onclick="fecharModalTransacoes()">Fechar</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-pergunta-cadastro" class="modal">
+    <div class="modal-content">
+        <h3 id="pergunta-titulo"></h3>
+        <p id="pergunta-texto"></p>
+        <div class="modal-botoes">
+            <button onclick="responderPerguntaCadastro(false)">Não</button>
+            <button onclick="responderPerguntaCadastro(true)">Sim, cadastrar</button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
