@@ -447,7 +447,7 @@ body {
             setTimeout(() => {
                 div.style.opacity = '0';
                 setTimeout(() => div.remove(), 100);
-            }, 20000);
+            }, 8000);
         }
     }
 
@@ -462,7 +462,7 @@ body {
             document.getElementById("inputValor").placeholder = "Recebi 1000 nubank | Gastei 50 | Comprei no cartão nubank 200";
             document.getElementById("projetarSaldo").checked = config.projetarSaldo;
             if (document.getElementById("chat-area").children.length === 0) {
-                addMensagem("Use: Recebi | Gastei | Comprei no cartão", 'system', '', false);
+                addMensagem("Use: Recebi | Gastei | Comprei no cartão", 'system', '', true);
             }
         }
     }
