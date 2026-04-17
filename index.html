@@ -370,6 +370,8 @@ body {
     let transacaoPendente = null;
     let contaSelecionadaSidebar = null;
 
+	
+
     function cap(s) {
         if (!s) return s;
         return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
@@ -426,6 +428,7 @@ body {
         }
         return total || null;
     }
+
 
     function addMensagem(texto, tipo = 'system', info = '', autoLimpar = true, transacaoId = null) {
         const chatArea = document.getElementById("chat-area");
@@ -752,19 +755,24 @@ body {
             renderAbaCartoes();
         }
     }
+function abrirEditarTransacao(id) {
+    const t = dados.find(x => x.id === id);
+    if (!t || t.isSaldoInicial) return;
 
-    function abrirEditarTransacao(id) {
-        const t = dados.find(x => x.id === id);
-        if (!t || t.isSaldoInicial) return;
-        editandoTransacaoId = id;
-        document.getElementById("editar-transacao-valor").value = t.valor;
-        document.getElementById("editar-transacao-descricao").value = t.descricao;
-        document.getElementById("editar-transacao-tipo").value = t.tipo;
-        const select = document.getElementById("editar-transacao-conta");
-        select.innerHTML = contas.map(c => `<option value="${c.nome}" ${c.nome === t.banco? 'selected' : ''}>${c.nome}</option>`).join('');
-        document.getElementById("modal-editar-transacao").style.display = "flex";
-    }
+    editandoTransacaoId = id;
 
+    document.getElementById("editar-transacao-categoria").value = t.categoria || "Outros";
+    document.getElementById("editar-transacao-valor").value = t.valor;
+    document.getElementById("editar-transacao-descricao").value = t.descricao;
+    document.getElementById("editar-transacao-tipo").value = t.tipo;
+
+    const select = document.getElementById("editar-transacao-conta");
+    select.innerHTML = contas
+        .map(c => `<option value="${c.nome}" ${c.nome === t.banco ? 'selected' : ''}>${c.nome}</option>`)
+        .join('');
+
+    document.getElementById("modal-editar-transacao").style.display = "flex";
+}
     function fecharModalEditarTransacao() {
         document.getElementById("modal-editar-transacao").style.display = "none";
         editandoTransacaoId = null;
@@ -876,6 +884,7 @@ function responderPerguntaCadastro(cadastrar) {
     function processarMsg(texto) {
         addMensagem(texto, 'user');
         const txt = texto.toLowerCase();
+const categoria = detectarCategoria(texto);
 
         let valor = null;
         const numMatch = txt.match(/(\d+[\.,]?\d*)/);
@@ -1401,47 +1410,66 @@ function renderAbaContas() {
         }
     }
 
-    function enviarMsg() {
-        const texto = document.getElementById("inputValor").value.trim();
-        if (!texto) return;
-        document.getElementById("inputValor").value = "";
-        processarMsg(texto);
+    function processarMsg(texto) {
+    addMensagem(texto, 'user');
+    const txt = texto.toLowerCase();
+
+    // 👇 NOVO
+    const categoria = detectarCategoria(texto);
+
+    let valor = null;
+    const numMatch = txt.match(/(\d+[\.,]?\d*)/);
+    if (numMatch) valor = parseFloat(numMatch[1].replace(',', '.'));
+    else valor = extensoParaNumero(txt);
+
+    if (!valor) {
+        addMensagem("Não entendi o valor. Use: Recebi 1000 nubank", 'system');
+        return;
     }
 
-    function processarMsg(texto) {
-        addMensagem(texto, 'user');
-        const txt = texto.toLowerCase();
+    let bancoMencionado = null;
+    let cartaoMencionado = null;
 
-        let valor = null;
-        const numMatch = txt.match(/(\d+[\.,]?\d*)/);
-        if (numMatch) valor = parseFloat(numMatch[1].replace(',', '.'));
-        else valor = extensoParaNumero(txt);
+    contas.forEach(c => {
+        if (txt.includes(c.nome.toLowerCase())) bancoMencionado = c.nome;
+    });
+    cartoes.forEach(c => {
+        if (txt.includes(c.nome.toLowerCase())) cartaoMencionado = c.nome;
+    });
 
-        if (!valor) {
-            addMensagem("Não entendi o valor. Use: Recebi 1000 nubank", 'system');
-            return;
-        }
+    let tipo = null;
+    let metodo = 'saldo';
+    let descricao = texto;
 
-        let bancoMencionado = null;
-        let cartaoMencionado = null;
+    if (txt.includes('recebi') || txt.includes('entrada')) tipo = 'entrada';
+    else if (txt.includes('gastei') || txt.includes('saida') || txt.includes('paguei')) tipo = 'saida';
+    else if (txt.includes('comprei') || txt.includes('cartao') || txt.includes('cartão')) {
+        tipo = 'saida';
+        metodo = 'cartao';
+    }
 
-        contas.forEach(c => {
-            if (txt.includes(c.nome.toLowerCase())) bancoMencionado = c.nome;
-        });
-        cartoes.forEach(c => {
-            if (txt.includes(c.nome.toLowerCase())) cartaoMencionado = c.nome;
-        });
+    // 👇 IMPORTANTE: quando salvar
+    dados.push({
+        id: Date.now(),
+        descricao: descricao,
+        valor: valor,
+        tipo: tipo,
+        metodo: metodo,
+        banco: bancoMencionado,
+        cartao: cartaoMencionado,
+        categoria: categoria, // 👈 AQUI
+        data: new Date().toISOString(),
+        texto: texto
+    });
 
-        let tipo = null;
-        let metodo = 'saldo';
-        let descricao = texto;
+    salvar();
 
-        if (txt.includes('recebi') || txt.includes('entrada')) tipo = 'entrada';
-        else if (txt.includes('gastei') || txt.includes('saida') || txt.includes('paguei')) tipo = 'saida';
-        else if (txt.includes('comprei') || txt.includes('cartao') || txt.includes('cartão')) {
-            tipo = 'saida';
-            metodo = 'cartao';
-        }
+    addMensagem(
+        `Lançamento registrado: R$ ${valor.toFixed(2)}`,
+        'system',
+        `Categoria: ${categoria}`
+    );
+}
 
         if (!tipo) {
             addMensagem("Use: Recebi | Gastei | Comprei no cartão", 'system');
@@ -1749,7 +1777,22 @@ function renderAbaContas() {
         <input type="text" id="editar-transacao-descricao">
         <label>Conta</label>
         <select id="editar-transacao-conta"></select>
-        <label>Tipo</label>
+       <label>Tipo</label>
+<select id="editar-transacao-tipo">
+    <option value="entrada">Entrada</option>
+    <option value="saida">Saída</option>
+</select>
+
+<label>Categoria</label>
+<select id="editar-transacao-categoria">
+    <option>Alimentação</option>
+    <option>Transporte</option>
+    <option>Moradia</option>
+    <option>Lazer</option>
+    <option>Saúde</option>
+    <option>Receita</option>
+    <option>Outros</option>
+</select>
         <select id="editar-transacao-tipo">
             <option value="entrada">Entrada</option>
             <option value="saida">Saída</option>
