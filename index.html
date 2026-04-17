@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Bank Day - Finanças Inteligentes</title>
     
     <link rel="manifest" href="manifest.json">
@@ -45,18 +45,54 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        html, body { height: 100%; }
-        body { background: #0a1014; color: var(--text); overflow: hidden; }
+       
+        
+        html, body {
+    height: 100%;
+}
 
-        .app-wrapper {
-            max-width: 1600px;
-            margin: 0 auto;
-            height: 100vh;
-            display: flex;
-            background: var(--bg);
-            box-shadow: 0 0 20px rgba(0,0,0,0.3);
-        }
+body {
+    background: #0a1014;
+    color: var(--text);
+    overflow: hidden;
+}
 
+/* Usa altura dinâmica real do mobile */
+.app-wrapper {
+    max-width: 1600px;
+    margin: 0 auto;
+    height: 100dvh; /* 👈 troca aqui */
+    display: flex;
+}
+
+/* Garante que o container respeite o teclado */
+.container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+/* IMPORTANTE: evita o input sumir */
+.chat-area {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+/* Mantém o input sempre visível */
+.input-area {
+    position: sticky;
+    bottom: 0;
+    background: var(--card);
+    padding: 8px 12px;
+}
+        
+@supports (height: 100dvh) {
+    .app-wrapper {
+        height: 100dvh;
+    }
+}
         .sidebar {
             width: 30%;
             min-width: 320px;
