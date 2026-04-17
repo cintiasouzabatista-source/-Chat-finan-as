@@ -76,18 +76,19 @@
        .lista-item-acoes button{background:none;border:none;font-size:18px;cursor:pointer;padding:4px}
        .lista-item-acoes button:disabled{opacity:0.3;cursor:not-allowed}
        
-       /* COLA O CSS DO RODAPÉ AQUI, ANTES DO </style> */
+       /* RODAPÉ */
        .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--header);display:flex;justify-content:space-around;padding:8px 0;border-top:1px solid rgba(255,255,255,0.1);z-index:100}
        .nav-item{background:none;border:none;color:var(--header-text);opacity:0.6;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;cursor:pointer;padding:4px 12px}
        .nav-item span:first-child{font-size:20px}
        .nav-item.active{opacity:1}
     </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <!-- TODO SEU CONTEÚDO ATUAL VEM AQUI -->
     <!-- header, chat-area, input-area, modais, tudo -->
     
-    <!-- COLA O HTML DO RODAPÉ AQUI, ANTES DO </body> -->
+    <!-- RODAPÉ -->
     <div class="bottom-nav">
         <button class="nav-item active" onclick="trocarAba('transacoes')">
             <span>💬</span>
@@ -110,7 +111,6 @@
     <script>
         // SEU JS TODO VEM AQUI
         
-        // COLA A FUNÇÃO NOVA AQUI DENTRO DO SCRIPT
         function trocarAba(aba) {
             document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
             event.target.closest('.nav-item').classList.add('active');
@@ -118,6 +118,8 @@
     </script>
 </body>
 </html>
+
+
     <div class="container">
         <div class="app-header">
             <div class="header-top">
