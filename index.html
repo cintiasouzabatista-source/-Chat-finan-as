@@ -355,10 +355,13 @@ function atualizar() {
     const mes = mesAtual.getMonth();
     const ano = mesAtual.getFullYear();
     document.getElementById("mesAtual").textContent = mesAtual.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    
+    // Dados do mês atual
     const dadosMes = dados.filter(d => {
         const dt = new Date(d.data);
         return dt.getMonth() === mes && dt.getFullYear() === ano;
     });
+    
     let entradas = 0, saidas = 0, fatura = 0;
     dadosMes.forEach(d => {
         if (d.metodo === 'cartao') fatura += d.valor;
@@ -366,7 +369,23 @@ function atualizar() {
         else saidas += d.valor;
     });
     
-    const saldo = entradas - saidas;
+    let saldo = entradas - saidas;
+    
+    // Se projetar saldo estiver ligado, soma saldo dos meses anteriores
+    if (config.projetarSaldo) {
+        const dadosAnteriores = dados.filter(d => {
+            const dt = new Date(d.data);
+            return dt < new Date(ano, mes, 1); // tudo antes do dia 1 do mês atual
+        });
+        
+        let saldoAnterior = 0;
+        dadosAnteriores.forEach(d => {
+            if (d.metodo !== 'cartao') {
+                saldoAnterior += d.tipo === 'entrada' ? d.valor : -d.valor;
+            }
+        });
+        saldo += saldoAnterior;
+    }
     
     document.getElementById("totalEntradas").textContent = mostrar? `R$ ${entradas.toFixed(2)}` : 'R$ ••••';
     document.getElementById("totalSaidas").textContent = mostrar? `R$ ${saidas.toFixed(2)}` : 'R$ ••••';
@@ -375,7 +394,6 @@ function atualizar() {
     
     salvar();
 }
-
 function mudarMes(delta) {
     mesAtual.setMonth(mesAtual.getMonth() + delta);
     atualizar();
