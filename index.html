@@ -758,18 +758,23 @@ body {
 function abrirEditarTransacao(id) {
     const t = dados.find(x => x.id === id);
     if (!t || t.isSaldoInicial) return;
-
     editandoTransacaoId = id;
-
-    document.getElementById("editar-transacao-categoria").value = t.categoria || "Outros";
+    
     document.getElementById("editar-transacao-valor").value = t.valor;
     document.getElementById("editar-transacao-descricao").value = t.descricao;
     document.getElementById("editar-transacao-tipo").value = t.tipo;
+    
+    // Preenche contas
+    const selectConta = document.getElementById("editar-transacao-conta");
+    selectConta.innerHTML = contas.map(c => `<option value="${c.nome}" ${c.nome === t.banco? 'selected' : ''}>${c.nome}</option>`).join('');
 
-    const select = document.getElementById("editar-transacao-conta");
-    select.innerHTML = contas
-        .map(c => `<option value="${c.nome}" ${c.nome === t.banco ? 'selected' : ''}>${c.nome}</option>`)
-        .join('');
+	/ Preenche categorias
+    const categorias = ['Alimentação','Transporte','Moradia','Lazer','Saúde','Compras','Salário','Outros'];
+    const selectCat = document.getElementById("editar-transacao-categoria");
+    selectCat.innerHTML = categorias.map(cat => `<option value="${cat}" ${cat === (t.categoria || 'Outros')? 'selected' : ''}>${cat}</option>`).join('');
+    
+    document.getElementById("modal-editar-transacao").style.display = "flex";
+}
 
     document.getElementById("modal-editar-transacao").style.display = "flex";
 }
@@ -778,16 +783,17 @@ function abrirEditarTransacao(id) {
         editandoTransacaoId = null;
     }
 
-    function salvarEdicaoTransacao() {
-        const t = dados.find(x => x.id === editandoTransacaoId);
-        t.valor = parseFloat(document.getElementById("editar-transacao-valor").value);
-        t.descricao = document.getElementById("editar-transacao-descricao").value;
-        t.banco = document.getElementById("editar-transacao-conta").value;
-        t.tipo = document.getElementById("editar-transacao-tipo").value;
-        salvar();
-        fecharModalEditarTransacao();
-        atualizar();
-    }
+ function salvarEdicaoTransacao() {
+    const t = dados.find(x => x.id === editandoTransacaoId);
+    t.valor = parseFloat(document.getElementById("editar-transacao-valor").value);
+    t.descricao = document.getElementById("editar-transacao-descricao").value;
+    t.banco = document.getElementById("editar-transacao-conta").value;
+    t.tipo = document.getElementById("editar-transacao-tipo").value;
+    t.categoria = document.getElementById("editar-transacao-categoria").value;
+    salvar();
+    fecharModalEditarTransacao();
+    atualizar();
+}
 
     function excluirTransacao() {
         if (confirm("Excluir este lançamento?")) {
@@ -951,24 +957,24 @@ const categoria = detectarCategoria(texto);
         }
     }
 
-    function criarLancamento(valor, tipo, metodo, banco, descricao, cartao = null) {
-        const transacao = {
-            id: Date.now(),
-            valor: valor,
-            tipo: tipo,
-            metodo: metodo,
-            banco: banco,
-            cartao: cartao,
-            descricao: descricao,
-            data: mesAtual.toISOString(),
-            texto: descricao
-        };
-        dados.push(transacao);
-        salvar();
-        atualizar();
-        addMensagem(`Lançamento registrado: R$ ${valor.toFixed(2)}`, 'system', `Conta: ${banco}${cartao? ' | Cartão: ' + cartao : ''}`, true, transacao.id);
-    }
-
+function criarLancamento(valor, tipo, metodo, banco, descricao, cartao = null) {
+    const transacao = {
+        id: gerarId(),
+        valor: valor,
+        tipo: tipo,
+        metodo: metodo,
+        banco: banco,
+        cartao: cartao,
+        descricao: descricao,
+        data: mesAtual.toISOString(),
+        texto: descricao,
+        categoria: identificarCategoria(descricao)
+    };
+    dados.push(transacao);
+    salvar();
+    atualizar();
+    addMensagem(`Lançamento registrado: R$ ${valor.toFixed(2)}`, 'system', `Conta: ${banco}${cartao? ' | Cartão: ' + cartao : ''} | ${transacao.categoria}`, true, transacao.id);
+}
     function abrirReset() {
         document.getElementById("menuDropdown").style.display = "none";
         document.getElementById("modal-reset").style.display = "flex";
@@ -1798,7 +1804,7 @@ function renderAbaContas() {
             <option value="saida">Saída</option>
         </select>
         <div class="modal-botoes">
-            <button onclick="excluirTransacao()" class="danger">Excluir</button>
+              <button onclick="excluirTransacao()" class="danger">Excluir</button>
             <button onclick="salvarEdicaoTransacao()">Salvar</button>
         </div>
         <button onclick="fecharModalEditarTransacao()" style="margin-top:8px;background:none;border:1px solid var(--border);color:var(--text);padding:10px;border-radius:6px;cursor:pointer;">Cancelar</button>
