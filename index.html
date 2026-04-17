@@ -10,227 +10,156 @@
         body.dark{--bg:#0b141a;--card:#1f2c33;--text:#e9edef;--border:#2a3942;--primary:#00a884;--msg-user:#005c4b;--msg-system:#1f2c33;--header:#1f2c33;--header-text:#e9edef}
         *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
         html,body{height:100%}
-        body{background:var(--bg);color:var(--text);overflow:hidden}
+        body{background:var(--bg);color:var(--text);overflow:hidden; display: flex; flex-direction: column;}
         
-        /* ESTRUTURA DE VIEWS */
-        .view { display: flex; flex-direction: column; height: 100vh; height: 100dvh; background: var(--bg); }
-        .container{max-width:480px;margin:0 auto;box-shadow:0 0 20px rgba(0,0,0,0.1);position:relative}
-
+        .container{max-width:480px;margin:0 auto; flex: 1; display:flex; flex-direction:column; background:var(--bg); box-shadow:0 0 20px rgba(0,0,0,0.1); padding-bottom:60px}
+        
         /* HEADER */
         .app-header{background:var(--header);color:var(--header-text);padding:12px 16px 8px 16px;box-shadow:0 2px 4px rgba(0,0,0,0.2);flex-shrink:0}
-        .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-        .header-top h1, .header-top h2{font-size:18px}
-        .icon-btn{cursor:pointer;font-size:20px;background:none;border:none;color:var(--header-text);display:flex;align-items:center;justify-content:center}
+        .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;position:relative}
+        .header-top h1{font-size:18px}
+        .header-actions{display:flex;gap:15px;align-items:center}
+        .icon-btn{cursor:pointer;font-size:20px;background:none;border:none;color:var(--header-text);font-weight:900}
         
-        /* FILTROS E LISTA (NOVO) */
-        .filtros-extrato { padding: 12px 16px; background: var(--card); border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
-        .filtros-extrato select, .filtros-extrato input { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 14px; }
-        .lista-transacoes { flex: 1; overflow-y: auto; padding: 8px 0 70px 0; background: var(--bg); }
-        .item-transacao { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; background: var(--card); }
-        .item-transacao:active { background: var(--bg); }
-        .item-info { display: flex; flex-direction: column; }
-        .item-desc { font-weight: 500; font-size: 14px; color: var(--text); }
-        .item-sub { font-size: 12px; opacity: 0.6; margin-top: 2px; color: var(--text); }
-        .item-valor { font-weight: bold; font-size: 15px; }
-        .item-valor.pos { color: #4caf50; }
-        .item-valor.neg { color: #f44336; }
-        .sem-dados { text-align: center; padding: 40px; opacity: 0.5; color: var(--text); }
+        /* MENU DROPDOWN (Alterado para abrir de baixo) */
+        .menu-dropdown {
+            position: fixed;
+            bottom: 70px;
+            right: 16px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px;
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            z-index: 150;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+            min-width: 220px;
+        }
+        .menu-dropdown button {
+            background: none;
+            border: none;
+            color: var(--text);
+            padding: 12px 16px;
+            text-align: left;
+            border-radius: 4px;
+            cursor: pointer;
+            white-space: nowrap;
+            font-size: 14px;
+        }
+        .menu-dropdown button:hover { background: var(--bg); }
 
-        /* MENU DROPDOWN */
-        .menu-dropdown { position: fixed; bottom: 70px; right: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 8px; display: none; flex-direction: column; gap: 4px; z-index: 150; box-shadow: 0 -2px 10px rgba(0,0,0,0.2); min-width: 220px; }
-        .menu-dropdown button { background: none; border: none; color: var(--text); padding: 12px 16px; text-align: left; cursor: pointer; font-size: 14px; }
+        /* ÁREA DE CHAT */
+        .chat-area{flex:1;overflow-y:auto;padding:12px;background-color:var(--bg);min-height:0}
+        .msg{display:flex;margin-bottom:8px;animation:slideIn 0.3s ease}
+        .msg.user{justify-content:flex-end}
+        .msg-bubble{max-width:75%;padding:8px 12px;border-radius:8px;box-shadow:0 1px 1px rgba(0,0,0,0.1);font-size:14px;color:var(--text)}
+        .msg.user .msg-bubble{background:var(--msg-user);border-bottom-right-radius:2px}
+        .msg.system .msg-bubble{background:var(--msg-system);border-bottom-left-radius:2px}
 
-        /* CHAT E NAV */
-        .chat-area{flex:1;overflow-y:auto;padding:12px;}
-        .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--header);display:flex;justify-content:space-around;padding:8px 0;z-index:100}
-        .nav-item{background:none;border:none;color:var(--header-text);opacity:0.6;display:flex;flex-direction:column;align-items:center;font-size:10px;cursor:pointer}
+        /* INPUT E NAV */
+        .input-area{background:var(--card);padding:8px 12px;display:flex;gap:8px;align-items:center;border-top:1px solid var(--border);flex-shrink:0}
+        #inputValor{flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:20px;background:var(--bg);color:var(--text)}
+        #btnEnviar{background:var(--primary);color:white;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer}
+
+        .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--header);display:flex;justify-content:space-around;padding:8px 0;border-top:1px solid rgba(255,255,255,0.1);z-index:100}
+        .nav-item{background:none;border:none;color:var(--header-text);opacity:0.6;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;cursor:pointer}
         .nav-item.active{opacity:1}
-    </style>
-</head>
-<body>
 
-<div class="container">
-    
-    <div id="main-view" class="view">
+        /* TOTAIS E MODAIS */
+        .mes-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;background:rgba(255,255,255,0.15);padding:6px 10px;border-radius:8px}
+        .totais{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+        .totais div{text-align:center;font-size:12px;background:rgba(255,255,255,0.15);padding:10px 8px;border-radius:8px;color:var(--header-text)}
+        .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:999}
+        .modal-content{background:var(--card);padding:20px;border-radius:12px;width:90%;max-width:420px}
+    </style>
+    </head>
+
+<body>
+    <div class="container">
         <div class="app-header">
             <div class="header-top">
                 <h1>Bank Day</h1>
-                <div style="display:flex; gap:15px">
-                    <button class="icon-btn" onclick="alternarTema()">🌙</button>
-                    <button class="icon-btn" onclick="alternarValores()">👁️</button>
+                <div class="header-actions">
+                    <button class="icon-btn" onclick="alternarTema()" id="btnTema">🌙</button>
+                    <button class="icon-btn" onclick="alternarValores()" id="olho">👁️</button>
                 </div>
             </div>
-            <div class="totais" style="display:grid; grid-template-columns: repeat(2,1fr); gap:8px;">
-                <div style="background:rgba(255,255,255,0.1); padding:8px; border-radius:8px; text-align:center; font-size:11px; color:white">Saldo: <strong id="saldoMes" style="display:block; font-size:14px">R$ 0,00</strong></div>
-                <div style="background:rgba(255,255,255,0.1); padding:8px; border-radius:8px; text-align:center; font-size:11px; color:white">Fatura: <strong id="totalFatura" style="display:block; font-size:14px">R$ 0,00</strong></div>
+            
+            <div class="mes-nav">
+                <button onclick="mudarMes(-1)">&lt;</button>
+                <h2 id="mesAtual">Janeiro</h2>
+                <button onclick="mudarMes(1)">&gt;</button>
             </div>
+
+            <div class="totais">
+                <div>Saldo <strong id="saldoMes">R$ 0,00</strong></div>
+                <div>Fatura <strong id="totalFatura" class="negativo">R$ 0,00</strong></div>
+            </div>
+        </div>
+
+        <div class="menu-dropdown" id="menuDropdown">
+            <button onclick="toggleProjetarSaldo()"><span id="txt-projetar">Projetar Saldo anterior</span></button>
+            <button onclick="abrirModalGerenciar()">Contas e Cartões</button>
+            <button onclick="abrirReset()">Resetar tudo</button>
         </div>
 
         <div class="chat-area" id="chat-area"></div>
 
-        <div class="input-area" style="padding:10px; background:var(--card); display:flex; gap:8px">
-            <input type="text" id="inputValor" placeholder="Recebi 1000..." style="flex:1; padding:10px; border-radius:20px; border:1px solid var(--border)">
-            <button onclick="enviarMsg()" style="background:var(--primary); border:none; color:white; width:40px; border-radius:50%">➤</button>
+        <div class="input-area">
+            <input type="text" id="inputValor" placeholder="Recebi 1000..." onkeydown="if(event.key==='Enter') enviarMsg()">
+            <button id="btnEnviar" onclick="enviarMsg()">➤</button>
         </div>
-    </div>
-
-    <div id="extrato-view" class="view" style="display:none;">
-        <div class="app-header">
-            <div class="header-top">
-                <button class="icon-btn" onclick="voltarMain()">←</button>
-                <h2>Extrato</h2>
-                <button class="icon-btn" onclick="exportarCSV()">⤓</button>
-            </div>
-            <div class="month-nav" style="display:flex; justify-content:center; align-items:center; gap:20px; color:white; padding:5px">
-                <button onclick="mudarMes(-1)" style="background:none; border:none; color:white; font-size:20px">‹</button>
-                <span id="mesAtualExtrato" style="font-weight:bold; text-transform:capitalize"></span>
-                <button onclick="mudarMes(1)" style="background:none; border:none; color:white; font-size:20px">›</button>
-            </div>
-        </div>
-
-        <div class="filtros-extrato">
-            <select id="filtroConta" onchange="atualizarExtrato()">
-                <option value="">Todas as contas</option>
-            </select>
-            <select id="filtroCartao" onchange="atualizarExtrato()">
-                <option value="">Todos os cartões</option>
-            </select>
-            <input type="text" id="buscaExtrato" placeholder="Buscar descrição..." oninput="atualizarExtrato()">
-        </div>
-
-        <div id="listaTransacoes" class="lista-transacoes"></div>
-    </div>
-
-    <div class="menu-dropdown" id="menuDropdown">
-        <button onclick="abrirModalGerenciar()">Contas e Cartões</button>
-        <button onclick="abrirReset()">Resetar tudo</button>
     </div>
 
     <div class="bottom-nav">
-        <button class="nav-item active" onclick="voltarMain()"><span>💬</span><span>Chat</span></button>
-        <button class="nav-item" onclick="abrirExtrato()"><span>📊</span><span>Extrato</span></button>
+        <button class="nav-item active"><span>💬</span><span>Chat</span></button>
+        <button class="nav-item"><span>📊</span><span>Extrato</span></button>
         <button class="nav-item"><span>📈</span><span>Gráficos</span></button>
-        <button class="nav-item" onclick="toggleMenu()"><span>⋮</span><span>Mais</span></button>
+        <button class="nav-item" onclick="toggleMenu()">
+            <span>⋮</span>
+            <span>Mais</span>
+        </button>
     </div>
-
-</div>
-
-<script>
-    // Variáveis de controle fictícias (substitua pelas suas do banco de dados/localStorage)
-    let mesAtual = new Date();
-    let dados = []; // Aqui ficam suas transações
-    let contas = [];
-    let cartoes = [];
-
-    function cap(string) { return string.charAt(0).toUpperCase() + string.slice(1); }
-
-    function abrirExtrato() {
-        document.getElementById('main-view').style.display = 'none';
-        document.getElementById('extrato-view').style.display = 'flex';
-        
-        // Ativa ícone no rodapé
-        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-        document.querySelector('[onclick="abrirExtrato()"]').classList.add('active');
-
-        // Popula filtros (exemplo simples)
-        const selectConta = document.getElementById('filtroConta');
-        selectConta.innerHTML = '<option value="">Todas as contas</option>';
-        contas.forEach(c => selectConta.innerHTML += `<option value="${c.nome}">${c.nome}</option>`);
-
-        const selectCartao = document.getElementById('filtroCartao');
-        selectCartao.innerHTML = '<option value="">Todos os cartões</option>';
-        cartoes.forEach(c => selectCartao.innerHTML += `<option value="${c.nome}">${c.nome}</option>`);
-
-        atualizarExtrato();
-    }
-
-    function voltarMain() {
-        document.getElementById('extrato-view').style.display = 'none';
-        document.getElementById('main-view').style.display = 'flex';
-        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-        document.querySelector('[onclick="voltarMain()"]').classList.add('active');
-    }
-
-    function mudarMes(delta) {
-        mesAtual.setMonth(mesAtual.getMonth() + delta);
-        if(document.getElementById('extrato-view').style.display === 'flex') {
-            atualizarExtrato();
-        }
-    }
-
-    function atualizarExtrato() {
-        const mesNome = mesAtual.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-        document.getElementById('mesAtualExtrato').textContent = cap(mesNome);
-
-        const filtroConta = document.getElementById('filtroConta').value;
-        const filtroCartao = document.getElementById('filtroCartao').value;
-        const busca = document.getElementById('buscaExtrato').value.toLowerCase();
-
-        // Filtra as transações pelo mês e ano selecionados
-        let transacoesMes = dados.filter(t => {
-            const d = new Date(t.data);
-            return d.getMonth() === mesAtual.getMonth() && d.getFullYear() === mesAtual.getFullYear();
-        });
-
-        // Aplica filtros adicionais
-        if (filtroConta) transacoesMes = transacoesMes.filter(t => t.banco === filtroConta);
-        if (filtroCartao) transacoesMes = transacoesMes.filter(t => t.cartao === filtroCartao);
-        if (busca) transacoesMes = transacoesMes.filter(t => t.descricao.toLowerCase().includes(busca));
-
-        transacoesMes.sort((a,b) => new Date(b.data) - new Date(a.data));
-
-        const lista = document.getElementById('listaTransacoes');
-        lista.innerHTML = '';
-
-        if (!transacoesMes.length) {
-            lista.innerHTML = '<div class="sem-dados">Nenhuma transação encontrada</div>';
-            return;
+    <script>
+        // Função para abrir/fechar o menu flutuante
+        function toggleMenu() {
+            const menu = document.getElementById("menuDropdown");
+            if (menu.style.display === "flex") {
+                menu.style.display = "none";
+            } else {
+                menu.style.display = "flex";
+            }
         }
 
-        transacoesMes.forEach(t => {
-            const div = document.createElement('div');
-            div.className = 'item-transacao';
-            // div.onclick = () => abrirEditarTransacao(t.id); // Requer sua função de edição
+        // Fechar o menu ao clicar fora
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById("menuDropdown");
+            const btnMais = e.target.closest('.nav-item');
+            const clicouNoMenu = e.target.closest('.menu-dropdown');
 
-            const valorClasse = t.tipo === 'entrada'? 'pos' : 'neg';
-            const sinal = t.tipo === 'entrada'? '+' : '-';
-            const metodoTxt = t.metodo === 'cartao'? `💳 ${t.cartao}` : `💰 ${t.banco}`;
-            const dataTxt = new Date(t.data).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'});
-
-            div.innerHTML = `
-                <div class="item-info">
-                    <div class="item-desc">${t.descricao}</div>
-                    <div class="item-sub">${metodoTxt} • ${dataTxt}</div>
-                </div>
-                <div class="item-valor ${valorClasse}">${sinal} R$ ${t.valor.toFixed(2)}</div>
-            `;
-            lista.appendChild(div);
+            if (!clicouNoMenu && !btnMais) {
+                menu.style.display = "none";
+            }
         });
-    }
 
-    function exportarCSV() {
-        if(!dados.length) return alert("Sem dados para exportar");
-        let csv = 'Data,Descrição,Valor,Tipo,Método,Banco,Cartão\n';
-        dados.forEach(t => {
-            csv += `${new Date(t.data).toLocaleDateString('pt-BR')},"${t.descricao}",${t.valor},${t.tipo},${t.metodo},${t.banco},${t.cartao || ''}\n`;
-        });
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `bankday_extrato.csv`;
-        a.click();
-    }
+        function alternarTema() {
+            document.body.classList.toggle('dark');
+            const btn = document.getElementById('btnTema');
+            btn.innerText = document.body.classList.contains('dark') ? '☀️' : '🌙';
+        }
 
-    function toggleMenu() {
-        const m = document.getElementById('menuDropdown');
-        m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
-    }
+        function alternarValores() {
+            // Adicione sua lógica para esconder/mostrar os valores aqui
+            console.log("Alternando visualização de valores");
+        }
 
-    function alternarTema() {
-        document.body.classList.toggle('dark');
-    }
-</script>
+        function enviarMsg() {
+            console.log("Mensagem enviada!");
+        }
 
-</body>
+        // Adicione aqui suas outras funções (enviarMsg, mudarMes, etc)
+    </script>
+    </body>
 </html>
