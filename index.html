@@ -16,7 +16,7 @@
         body.dark{--bg:#0b141a;--card:#1f2c33;--text:#e9edef;--border:#2a3942;--primary:#00a884;--msg-user:#005c4b;--msg-system:#1f2c33;--header:#1f2c33;--header-text:#e9edef}
         *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
         html,body{height:100%}
-        body{background:var(--bg);color:var(--text);overflow:hidden}
+        body{background:var(--bg);color:var(--text);overflow:hidden;padding-bottom:60px}
        .container{max-width:480px;margin:0 auto;height:100vh;height:100dvh;display:flex;flex-direction:column;background:var(--bg);box-shadow:0 0 20px rgba(0,0,0,0.1)}
        .chat-area::-webkit-scrollbar{width:6px}
        .chat-area::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.2);border-radius:3px}
@@ -26,14 +26,7 @@
        .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;position:relative}
        .header-top h1{font-size:18px}
        .header-actions{display:flex;gap:10px;align-items:center}
-      .icon-btn{
-    cursor:pointer;
-    font-size:20px;
-    background:none;
-    border:none;
-    color:var(--header-text);
-    font-weight:900
-}
+      .icon-btn{cursor:pointer;font-size:20px;background:none;border:none;color:var(--header-text);font-weight:900}
        .mes-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;background:rgba(255,255,255,0.15);padding:6px 10px;border-radius:8px}
        .mes-nav button{background:none;border:none;font-size:18px;color:var(--header-text);cursor:pointer;padding:0 8px}
        .mes-nav h2{text-transform:capitalize;font-size:16px;color:var(--header-text);font-weight:600}
@@ -82,9 +75,49 @@
        .lista-item-acoes{display:flex;gap:6px}
        .lista-item-acoes button{background:none;border:none;font-size:18px;cursor:pointer;padding:4px}
        .lista-item-acoes button:disabled{opacity:0.3;cursor:not-allowed}
+       
+       /* COLA O CSS DO RODAPÉ AQUI, ANTES DO </style> */
+       .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--header);display:flex;justify-content:space-around;padding:8px 0;border-top:1px solid rgba(255,255,255,0.1);z-index:100}
+       .nav-item{background:none;border:none;color:var(--header-text);opacity:0.6;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;cursor:pointer;padding:4px 12px}
+       .nav-item span:first-child{font-size:20px}
+       .nav-item.active{opacity:1}
     </style>
 </head>
 <body>
+    <!-- TODO SEU CONTEÚDO ATUAL VEM AQUI -->
+    <!-- header, chat-area, input-area, modais, tudo -->
+    
+    <!-- COLA O HTML DO RODAPÉ AQUI, ANTES DO </body> -->
+    <div class="bottom-nav">
+        <button class="nav-item active" onclick="trocarAba('transacoes')">
+            <span>💬</span>
+            <span>Chat</span>
+        </button>
+        <button class="nav-item" onclick="trocarAba('relatorios')">
+            <span>📊</span>
+            <span>Relatórios</span>
+        </button>
+        <button class="nav-item" onclick="trocarAba('graficos')">
+            <span>📈</span>
+            <span>Gráficos</span>
+        </button>
+        <button class="nav-item" onclick="toggleMenu()">
+            <span>⋮</span>
+            <span>Mais</span>
+        </button>
+    </div>
+    
+    <script>
+        // SEU JS TODO VEM AQUI
+        
+        // COLA A FUNÇÃO NOVA AQUI DENTRO DO SCRIPT
+        function trocarAba(aba) {
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.nav-item').classList.add('active');
+        }
+    </script>
+</body>
+</html>
     <div class="container">
         <div class="app-header">
             <div class="header-top">
