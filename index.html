@@ -26,7 +26,14 @@
        .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;position:relative}
        .header-top h1{font-size:18px}
        .header-actions{display:flex;gap:10px;align-items:center}
-       .icon-btn{cursor:pointer;font-size:20px;background:none;border:none;color:var(--header-text)}
+      .icon-btn{
+    cursor:pointer;
+    font-size:20px;
+    background:none;
+    border:none;
+    color:var(--header-text);
+    font-weight:900
+}
        .mes-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;background:rgba(255,255,255,0.15);padding:6px 10px;border-radius:8px}
        .mes-nav button{background:none;border:none;font-size:18px;color:var(--header-text);cursor:pointer;padding:0 8px}
        .mes-nav h2{text-transform:capitalize;font-size:16px;color:var(--header-text);font-weight:600}
@@ -40,7 +47,8 @@
         @keyframes slideIn{from{opacity:0;transform:translateY(10px)}}
        .msg.user{justify-content:flex-end}
        .msg-bubble{max-width:75%;padding:8px 12px;border-radius:8px;box-shadow:0 1px 1px rgba(0,0,0,0.1);font-size:14px;word-wrap:break-word;color:var(--text)}
-       .msg.user.msg-bubble{background:var(--msg-user);border-bottom-right-radius:2px;cursor:pointer}
+      .msg.user .msg-bubble{background:var(--msg-user);border-bottom-right-radius:2px;cursor:pointer}
+.msg .msg-bubble{cursor:pointer}
        .msg.system.msg-bubble{background:var(--msg-system);border-bottom-left-radius:2px}
        .msg-time{font-size:10px;opacity:0.6;margin-top:2px;text-align:right}
        .msg-info{font-size:11px;opacity:0.7;margin-top:4px}
@@ -84,7 +92,7 @@
                 <div class="header-actions">
                     <button class="icon-btn" onclick="alternarTema()" id="btnTema">🌙</button>
                     <button class="icon-btn" onclick="alternarValores()" id="olho">👁️</button>
-                    <button class="icon-btn" onclick="toggleMenu()">⋮</button>
+                   <button class="icon-btn" onclick="toggleMenu()">☰</button>
                     <div class="menu-dropdown" id="menuDropdown">
                         <button onclick="toggleProjetarSaldo()"><span id="txt-projetar">Projetar Saldo anterior</span></button>
                         <button onclick="abrirModalGerenciar()">Contas e Cartões</button>
@@ -164,11 +172,17 @@ function addMensagem(texto, tipo = 'system', info = '', autoLimpar = true, trans
     const div = document.createElement("div");
     div.className = `msg ${tipo}`;
     if (transacaoId) div.dataset.transacaoId = transacaoId;
-    div.innerHTML = `<div class="msg-bubble" ${transacaoId? `onclick="abrirEditarTransacao('${transacaoId}')"` : ''}>${texto}${info? `<div class="msg-info">${info}</div>` : ''}<div class="msg-time">${hora}</div></div>`;
+    div.innerHTML = `<div class="msg-bubble">${texto}${info? `<div class="msg-info">${info}</div>` : ''}<div class="msg-time">${hora}</div></div>`;
+    if (transacaoId) div.onclick = () => abrirEditarTransacao(transacaoId);
     chatArea.appendChild(div);
     chatArea.scrollTop = chatArea.scrollHeight;
-    if (autoLimpar && tipo === 'system') {
-        setTimeout(() => { div.style.opacity = '0'; setTimeout(() => div.remove(), 300); }, 8000);
+    
+    // Agora limpa system E user depois de 5s
+    if (autoLimpar) {
+        setTimeout(() => { 
+            div.style.opacity = '0'; 
+            setTimeout(() => div.remove(), 300); 
+        }, 8000);
     }
 }
 
@@ -351,10 +365,14 @@ function atualizar() {
         else if (d.tipo === 'entrada') entradas += d.valor;
         else saidas += d.valor;
     });
-    document.getElementById("totalEntradas").textContent = `R$ ${entradas.toFixed(2)}`;
-    document.getElementById("totalSaidas").textContent = `R$ ${saidas.toFixed(2)}`;
-    document.getElementById("totalFatura").textContent = `R$ ${fatura.toFixed(2)}`;
-    document.getElementById("saldoMes").textContent = `R$ ${(entradas - saidas).toFixed(2)}`;
+    
+    const saldo = entradas - saidas;
+    
+    document.getElementById("totalEntradas").textContent = mostrar? `R$ ${entradas.toFixed(2)}` : 'R$ ••••';
+    document.getElementById("totalSaidas").textContent = mostrar? `R$ ${saidas.toFixed(2)}` : 'R$ ••••';
+    document.getElementById("totalFatura").textContent = mostrar? `R$ ${fatura.toFixed(2)}` : 'R$ ••••';
+    document.getElementById("saldoMes").textContent = mostrar? `R$ ${saldo.toFixed(2)}` : 'R$ ••••';
+    
     salvar();
 }
 
